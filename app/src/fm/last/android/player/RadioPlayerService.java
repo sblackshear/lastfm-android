@@ -21,10 +21,9 @@
 package fm.last.android.player;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
+import java.net.URL;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -33,7 +32,10 @@ import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-import android.app.AlarmManager;
+import com.kvance.Nectroid.MP3Streamer;
+import com.kvance.Nectroid.MP3Streamer.CompletionListener;
+import com.kvance.Nectroid.MP3Streamer.ErrorListener;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -44,7 +46,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteException;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -64,7 +65,6 @@ import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import fm.last.android.AndroidLastFmServerFactory;
 import fm.last.android.LastFMApplication;
 import fm.last.android.LastFMMediaButtonHandler;
@@ -83,10 +83,12 @@ import fm.last.api.RadioTrack;
 import fm.last.api.Session;
 import fm.last.api.Station;
 import fm.last.api.WSError;
+import fm.last.util.UrlUtil;
 
 public class RadioPlayerService extends Service implements MusicFocusable {
 
-	private MediaPlayer mp = null;
+	//private MediaPlayer mp = null;
+	private MP3Streamer streamer = null;
 	private Station currentStation;
 	private Session currentSession;
 	private RadioTrack currentTrack;
@@ -211,8 +213,9 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 								// impossible, seeing as we are the only
 								// component that dares the pause the radio. But we
 								// cater to it just in case
-								if(mp != null && mp.isPlaying())
-									mp.setVolume(0.0f, 0.0f);
+								
+								//if(mp != null && mp.isPlaying())
+								//	mp.setVolume(0.0f, 0.0f);
 								return;
 							}
 	
@@ -263,9 +266,9 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 
 					logger.info("Data connection lost! Type: " + ni.getTypeName() + " Subtype: " + ni.getSubtypeName() + "Extra Info: " + ni.getExtraInfo()
 							+ " Reason: " + ni.getReason());
-					if (mp != null && bufferPercent < 99) {
+					if (streamer != null && bufferPercent < 99) {
 						try {
-							mp.stop();
+							streamer.cancel();
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -314,10 +317,8 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 	public void onDestroy() {
 		logger.info("Player service shutting down");
 		try {
-			if (mp != null) {
-				if (mp.isPlaying())
-					mp.stop();
-				mp.release();
+			if (streamer != null) {
+				streamer.cancel();
 			}
 		} catch (Exception e) {
 			
@@ -416,7 +417,24 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		mStationStartTime = System.currentTimeMillis();
 	}
 
-	private OnCompletionListener mOnCompletionListener = new OnCompletionListener() {
+	private ErrorListener mOnErrorListener = new ErrorListener() {
+
+		public void onMP3Error() {
+			new NextTrackTask().execute((Void) null);
+		}
+		
+	};
+	
+	private CompletionListener mOnCompletionListener = new CompletionListener() {
+
+		public void onMP3Completion() {
+			logger.info("Track completed normally (bye, laurie!)");
+			new NextTrackTask().execute((Void) null);
+		}
+		
+	};
+	
+	/*private OnCompletionListener mOnCompletionListener = new OnCompletionListener() {
 
 		public void onCompletion(MediaPlayer mp) {
 			logger.info("Track completed normally (bye, laurie!)");
@@ -503,28 +521,32 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 			}
 			return true;
 		}
-	};
+	};*/
 
-	private void playTrack(RadioTrack track, MediaPlayer p) {
+	private void playTrack(RadioTrack track) {
 		try {
 			if (mState == STATE_STOPPED || mState == STATE_PREPARING || mState == STATE_NODATA) {
 				logger.severe("playTrack() called from wrong state!");
 				return;
 			}
 
-			if (p == mp) {
-				currentTrack = track;
-				RadioWidgetProvider.updateAppWidget_playing(this, track.getTitle(), track.getCreator(), 0, 0, true, track.getLoved());
-			}
+			currentTrack = track;
+			RadioWidgetProvider.updateAppWidget_playing(this, track.getTitle(), track.getCreator(), 0, 0, true, track.getLoved());
 			logger.info("Streaming: " + track.getLocationUrl());
-			p.reset();
+
+			/*p.reset();
 			p.setWakeMode(this, PowerManager.PARTIAL_WAKE_LOCK);
 			p.setOnCompletionListener(mOnCompletionListener);
 			p.setOnBufferingUpdateListener(mOnBufferingUpdateListener);
 			p.setOnPreparedListener(mOnPreparedListener);
 			p.setOnErrorListener(mOnErrorListener);
 			p.setAudioStreamType(AudioManager.STREAM_MUSIC);
-			p.setDataSource(track.getLocationUrl());
+			p.setDataSource(track.getLocationUrl());*/
+			
+			streamer = new MP3Streamer(this, UrlUtil.getRedirectedUrl(new URL(track.getLocationUrl())), 128);
+			streamer.setErrorListener(mOnErrorListener);
+			streamer.setCompletionListener(mOnCompletionListener);
+			streamer.start();
 			
 	        if (mFocusHelper.isSupported())
 	            mFocusHelper.requestMusicFocus();
@@ -533,12 +555,12 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 			// that resulted in the music never becoming audible again after a
 			// call.
 			// Leave this precaution here please.
-			p.setVolume(1.0f, 1.0f);
+			//p.setVolume(1.0f, 1.0f);
 
-			if (p == mp)
-				mState = STATE_PREPARING;
+			//if (p == mp)
+			mState = STATE_PLAYING;
 			mTrackStartTime = System.currentTimeMillis();
-			p.prepareAsync();
+			//p.prepareAsync();
 		} catch (IllegalStateException e) {
 			logger.severe(e.toString());
 		} catch (IOException e) {
@@ -548,11 +570,10 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 
 	private void stop() {
 		mState = STATE_STOPPED;
-		if (mp != null) {
+		if (streamer != null) {
 			try {
-				mp.stop();
-				mp.release();
-				mp = null;
+				streamer.cancel();
+				streamer = null;
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -585,8 +606,9 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 
 		if (mState == STATE_PLAYING || mState == STATE_PREPARING) {
 			currentTrack = null;
-			if (mp.isPlaying()) {
-				mp.stop();
+			if (streamer != null) {
+				streamer.cancel();
+				streamer = null;
 			}
 		}
 
@@ -608,10 +630,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 			// playTrack will check if mStopping is true, and stop us if the
 			// user has
 			// pressed stop while we were fetching the playlist
-			if(mp == null) {
-				mp = new MediaPlayer();
-			}
-			playTrack(currentQueue.poll(), mp);
+			playTrack(currentQueue.poll());
 			notifyChange(META_CHANGED);
 		} else {
 			// we ran out of tracks, display a NEC error and stop
@@ -635,7 +654,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		// TODO: This should not be exposed in the UI, only used to pause
 		// during a phone call or similar interruption
 
-		if (mState != STATE_PAUSED) {
+		/*if (mState != STATE_PAUSED) {
 			Notification notification = new Notification(R.drawable.stop, getString(R.string.playerservice_paused_ticker_text), System.currentTimeMillis());
 			PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, Player.class), 0);
 			String info;
@@ -658,7 +677,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 			playingNotify();
 			mp.start();
 			mState = STATE_PLAYING;
-		}
+		}*/
 	}
 
 	private void refreshPlaylist() throws Exception {
@@ -827,7 +846,10 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		logger.info("Tuning to station: " + url);
 		if (mState == STATE_PLAYING) {
 			clearNotification();
-			mp.stop();
+			if(streamer != null) {
+				streamer.cancel();
+				streamer = null;
+			}
 		}
 		mState = STATE_TUNING;
 		currentQueue.clear();
@@ -871,6 +893,8 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		@Override
 		public Void doInBackground(Void... input) {
 			try {
+				Looper.prepare();
+				
 				tune(mStationURL, mSession);
 				currentTrack = null;
 				nextSong();
@@ -1010,8 +1034,8 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 
 		public long getDuration() throws RemoteException {
 			try {
-				if (mp != null && mp.isPlaying())
-					return mp.getDuration();
+				//if (mp != null && mp.isPlaying())
+					//return mp.getDuration();
 			} catch (Exception e) {
 			}
 			return 0;
@@ -1032,8 +1056,8 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 
 		public long getPosition() throws RemoteException {
 			try {
-				if (mp != null && mp.isPlaying())
-					return mp.getCurrentPosition();
+				//if (mp != null && mp.isPlaying())
+					//return mp.getCurrentPosition();
 			} catch (Exception e) {
 			}
 			return 0;
@@ -1136,7 +1160,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 				volumeValue *= (float) (mCurrentStep) / (float) mSteps;
 			}
 
-			mp.setVolume(volumeValue, volumeValue);
+			//mp.setVolume(volumeValue, volumeValue);
 
 			if (mCurrentStep >= mSteps) {
 				this.onPostExecute();
@@ -1230,16 +1254,16 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 			pause();
 		}
 
-		if(mp != null && mp.isPlaying())
-			mp.setVolume(1.0f, 1.0f);
+		//if(mp != null && mp.isPlaying())
+		//	mp.setVolume(1.0f, 1.0f);
 	}
 
 	public void focusLost(boolean isTransient, boolean canDuck) {
-        if (mp == null)
-            return;
+        //if (mp == null)
+            //return;
 
         if (canDuck) {
-            mp.setVolume(DUCK_VOLUME, DUCK_VOLUME);
+            //mp.setVolume(DUCK_VOLUME, DUCK_VOLUME);
         } else if(isTransient) {
             pause();
         } else {
