@@ -28,6 +28,9 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -302,7 +305,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		if (intent != null && intent.getAction() != null && intent.getAction().equals("fm.last.android.PLAY")) {
 			String stationURL = intent.getStringExtra("station");
 			Session session = intent.getParcelableExtra("session");
-			if(currentStationURL != null && currentStationURL.equals(stationURL)) {
+			if(currentStationURL != null && currentStationURL.equals(stationURL) && !stationURL.startsWith("boffin-tag://")) {
 				if(mState == STATE_PAUSED)
 					pause();
 				if(mState != STATE_STOPPED)
@@ -783,6 +786,13 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		}
 	}
 
+	public class SortByWeight implements Comparator<LocalCollection.FilesWithTagResult>{
+
+	    public int compare(LocalCollection.FilesWithTagResult o1, LocalCollection.FilesWithTagResult o2) {
+	        return (int)(o2.weight - o1.weight);
+	    }
+	}
+	
 	private void refreshPlaylist() throws Exception {
 		if (currentStation == null)
 			return;
@@ -792,8 +802,31 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 			if(currentStationURL.startsWith("boffin-tag://")) {
 				String tag = currentStationURL.substring(13);
 				List<LocalCollection.FilesWithTagResult> files = LocalCollection.getInstance().filesWithTag(tag);
+				List<LocalCollection.FilesWithTagResult> sortedFiles = new ArrayList<LocalCollection.FilesWithTagResult>(10);
+				List<String> artists = new ArrayList<String>();
 				logger.info("Got " + files.size() + " tracks");
-				Iterator<LocalCollection.FilesWithTagResult> i = files.iterator();
+				
+				for(int x = 0; x < 20; x++) {
+					float highestWeight = files.get(files.size() - 1).weight;
+					double p = Math.random() + 0.5;
+					if(p > 1)
+						p = 1;
+					
+					Iterator<LocalCollection.FilesWithTagResult> i = files.iterator();
+					while(i.hasNext()) {
+						LocalCollection.FilesWithTagResult r = i.next();
+						if(p < (r.weight / highestWeight) && r.weight > 1 && !artists.contains(r.meta.m_artist)) {
+							sortedFiles.add(r);
+							artists.add(r.meta.m_artist);
+							files.remove(r);
+							break;
+						} else {
+							p -= (r.weight / highestWeight);
+						}
+					}
+				}
+				Collections.sort(sortedFiles, new SortByWeight());
+				Iterator<LocalCollection.FilesWithTagResult> i = sortedFiles.iterator();
 				while(i.hasNext()) {
 					LocalCollection.FilesWithTagResult r = i.next();
 					logger.info("Boffin track (weight = " + r.weight + "): " + r.meta.m_artist + " - " + r.meta.m_title);

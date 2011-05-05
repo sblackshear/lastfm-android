@@ -346,7 +346,7 @@ public class LocalCollection extends SQLiteOpenHelper
         	"INNER JOIN files on tracktags.file = files.id " +
         	"INNER JOIN tags on tags.id = tracktags.tag " +
         	"INNER JOIN artists on files.artist = artists.id " +
-        	"WHERE tags.name = ? ORDER BY weight DESC";
+        	"WHERE tags.name = ? ORDER BY weight ASC";
 
 		SQLiteDatabase db = null;
 		Cursor c = null;
