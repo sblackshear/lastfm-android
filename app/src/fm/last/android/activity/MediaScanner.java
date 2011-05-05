@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -274,6 +275,9 @@ public class MediaScanner extends Activity implements LocalCollectionProgressCal
 		public void onPostExecute(Void result) {
 			publishProgress("--- Database update complete ---");
 			runOnUiThread(new ProgressRunnable(10000, false));
+			Intent intent = new Intent(MediaScanner.this, TopLocalTags.class);
+			startActivity(intent);
+			finish();
 		}
 	}
 }

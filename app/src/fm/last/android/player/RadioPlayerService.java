@@ -28,6 +28,8 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -77,6 +79,7 @@ import fm.last.android.R;
 import fm.last.android.RadioWidgetProvider;
 import fm.last.android.activity.Player;
 import fm.last.android.activity.Profile;
+import fm.last.android.db.LocalCollection;
 import fm.last.android.db.RecentStationsDao;
 import fm.last.android.scrobbler.ScrobblerService;
 import fm.last.android.utils.AsyncTaskEx;
@@ -306,7 +309,24 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 					return;
 			}
 			if (stationURL != null && stationURL.length() > 0 && session != null) {
-				new TuneRadioTask(stationURL, session).execute();
+				if(stationURL.startsWith("boffin-tag://")) {
+					try {
+						String tag = stationURL.substring(13);
+						logger.info("Boffin radio tag: " + tag);
+						currentStation = new Station(tag + "  Local Tag Radio", stationURL, "boffin-tag", "0");
+						currentStationURL = stationURL;
+						mState = STATE_TUNING;
+						currentQueue.clear();
+						nextSong();
+						if(!currentQueue.isEmpty())
+							notifyChange(STATION_CHANGED);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				} else {
+					new TuneRadioTask(stationURL, session).execute();
+				}
 			}
 		}
 	}
@@ -769,56 +789,68 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		LastFmServer server = AndroidLastFmServerFactory.getServer();
 		RadioPlayList playlist;
 		try {
-			String bitrate;
-			String rtp = "1";
-			String discovery = "0";
-			String multiplier = "2";
-			ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-			NetworkInfo ni = cm.getActiveNetworkInfo();
-			if(ni != null)
-				logger.info("Current network type: " + ni.getTypeName());
-			
-			if (ni != null && ni.getType() == ConnectivityManager.TYPE_MOBILE)
-				bitrate = "64";
-			else
-				bitrate = "128";
-
-			mDoHasWiFi = (ni == null || ni.getType() == ConnectivityManager.TYPE_WIFI);
-
-			if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("highquality", false))
-				bitrate = "128";
-
-			if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("scrobble", true))
-				rtp = "0";
-
-			if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("discovery", false))
-				discovery = "1";
-
-			if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("faststreaming", true))
-				multiplier = "8";
-
-			logger.info("Requesting bitrate: " + bitrate);
-			playlist = server.getRadioPlayList(bitrate, rtp, discovery, multiplier, currentSession.getKey());
-			if (playlist == null || playlist.getTracks().length == 0) {
-				try {
-					LastFMApplication.getInstance().tracker.trackEvent("Radio", // Category
-							"Error", // Action
-							"NotEnoughContent", // Label
-							0); // Value
-				} catch (Exception e) {
-					//Google Analytics doesn't appear to be thread safe
+			if(currentStationURL.startsWith("boffin-tag://")) {
+				String tag = currentStationURL.substring(13);
+				List<LocalCollection.FilesWithTagResult> files = LocalCollection.getInstance().filesWithTag(tag);
+				logger.info("Got " + files.size() + " tracks");
+				Iterator<LocalCollection.FilesWithTagResult> i = files.iterator();
+				while(i.hasNext()) {
+					LocalCollection.FilesWithTagResult r = i.next();
+					logger.info("Boffin track (weight = " + r.weight + "): " + r.meta.m_artist + " - " + r.meta.m_title);
+					currentQueue.add(r.toRadioTrack());
 				}
-				throw new WSError("radio.getPlaylist", "insufficient content", WSError.ERROR_NotEnoughContent);
-			}
-
-			SharedPreferences.Editor editor = getSharedPreferences(LastFm.PREFS, 0).edit();
-			editor.putInt("lastfm_playsleft", playlist.playLeft());
-			editor.commit();
-
-			RadioTrack[] tracks = playlist.getTracks();
-			logger.info("Got " + tracks.length + " track(s)");
-			for (int i = 0; i < tracks.length; i++) {
-				currentQueue.add(tracks[i]);
+			} else {
+				String bitrate;
+				String rtp = "1";
+				String discovery = "0";
+				String multiplier = "2";
+				ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+				NetworkInfo ni = cm.getActiveNetworkInfo();
+				if(ni != null)
+					logger.info("Current network type: " + ni.getTypeName());
+				
+				if (ni != null && ni.getType() == ConnectivityManager.TYPE_MOBILE)
+					bitrate = "64";
+				else
+					bitrate = "128";
+	
+				mDoHasWiFi = (ni == null || ni.getType() == ConnectivityManager.TYPE_WIFI);
+	
+				if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("highquality", false))
+					bitrate = "128";
+	
+				if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("scrobble", true))
+					rtp = "0";
+	
+				if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("discovery", false))
+					discovery = "1";
+	
+				if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("faststreaming", true))
+					multiplier = "8";
+	
+				logger.info("Requesting bitrate: " + bitrate);
+				playlist = server.getRadioPlayList(bitrate, rtp, discovery, multiplier, currentSession.getKey());
+				if (playlist == null || playlist.getTracks().length == 0) {
+					try {
+						LastFMApplication.getInstance().tracker.trackEvent("Radio", // Category
+								"Error", // Action
+								"NotEnoughContent", // Label
+								0); // Value
+					} catch (Exception e) {
+						//Google Analytics doesn't appear to be thread safe
+					}
+					throw new WSError("radio.getPlaylist", "insufficient content", WSError.ERROR_NotEnoughContent);
+				}
+	
+				SharedPreferences.Editor editor = getSharedPreferences(LastFm.PREFS, 0).edit();
+				editor.putInt("lastfm_playsleft", playlist.playLeft());
+				editor.commit();
+	
+				RadioTrack[] tracks = playlist.getTracks();
+				logger.info("Got " + tracks.length + " track(s)");
+				for (int i = 0; i < tracks.length; i++) {
+					currentQueue.add(tracks[i]);
+				}
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

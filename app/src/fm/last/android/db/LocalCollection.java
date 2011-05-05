@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import fm.last.android.LastFMApplication;
+import fm.last.api.RadioTrack;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -339,12 +340,88 @@ public class LocalCollection extends SQLiteOpenHelper
 		}
 	}
 
+	// returns a list of files matching the specified tag
+	public List<FilesWithTagResult>filesWithTag(String tag) {
+        String query = "SELECT file, filename, modification_date, duration, lowercase_name, album, lowercase_title, weight FROM tracktags " +
+        	"INNER JOIN files on tracktags.file = files.id " +
+        	"INNER JOIN tags on tags.id = tracktags.tag " +
+        	"INNER JOIN artists on files.artist = artists.id " +
+        	"WHERE tags.name = ? ORDER BY weight DESC";
+
+		SQLiteDatabase db = null;
+		Cursor c = null;
+		try {
+			db = getReadableDatabase();
+			c = db.rawQuery(query, new String[] { tag });
+			List<FilesWithTagResult> result = new ArrayList<FilesWithTagResult>(c.getCount());
+			if (c.getCount() > 0) {
+				c.moveToFirst();				
+				// Loop through all Results
+				do {
+					FilesWithTagResult r = new FilesWithTagResult();
+					File f = new File(c.getLong(c.getColumnIndex("file")), c.getString(c.getColumnIndex("filename")), c.getLong(c.getColumnIndex("modification_date")));
+					FileMeta m = new FileMeta(c.getString(c.getColumnIndex("lowercase_name")), c.getString(c.getColumnIndex("album")), c.getString(c.getColumnIndex("lowercase_title")), c.getLong(c.getColumnIndex("duration")));
+					r.file = f;
+					r.meta = m;
+					r.weight = c.getFloat(c.getColumnIndex("weight"));
+					result.add(r);
+				} while (c.moveToNext());
+			}
+			c.close();
+			db.close();
+			return result;
+		} finally {
+			if(c != null)
+				c.close();
+			if(db != null)
+				db.close();
+		}
+	}
+	
+	// returns a list (of up to 'limit') of the weightiest tags
+	public List<TopTagsResult>getTopTags(int limit) {
+	    String query = "SELECT name, sum(weight) AS weight FROM tracktags " +
+            "INNER JOIN tags ON tracktags.tag = tags.id " +
+            "INNER JOIN files ON tracktags.file = files.id " +
+            "GROUP BY tags.id " +
+            "ORDER BY sum(weight) DESC ";
+
+	    if( limit > 0 )
+	    	query += "LIMIT " + limit;
+	    
+		SQLiteDatabase db = null;
+		Cursor c = null;
+		try {
+			db = getReadableDatabase();
+			c = db.rawQuery(query, null);
+			List<TopTagsResult> result = new ArrayList<TopTagsResult>(c.getCount());
+			if (c.getCount() > 0) {
+				c.moveToFirst();				
+				// Loop through all Results
+				do {
+					TopTagsResult f = new TopTagsResult();
+					f.tag = c.getString(c.getColumnIndex("name"));
+					f.weight = c.getFloat(c.getColumnIndex("weight"));
+					result.add(f);
+				} while (c.moveToNext());
+			}
+			c.close();
+			db.close();
+			return result;
+		} finally {
+			if(c != null)
+				c.close();
+			if(db != null)
+				db.close();
+		}
+	}
+
 	public interface LocalCollectionProgressCallback {
 		public void localCollectionProgress(int current, int total);
 	}
 	
     public class File {
-        public File(long id, String name, int lastModified) {
+        public File(long id, String name, long lastModified) {
         	m_id = id;
         	m_name = name;
         	m_lastModified = lastModified;
@@ -352,11 +429,11 @@ public class LocalCollection extends SQLiteOpenHelper
 
         public long id() { return m_id; }
         public String name() { return m_name; }
-        public int lastModified() { return m_lastModified; }
+        public long lastModified() { return m_lastModified; }
 
         private long m_id;
         private String m_name;
-        private int m_lastModified;
+        private long m_lastModified;
     };
     
     public class FileMeta {
@@ -391,11 +468,25 @@ public class LocalCollection extends SQLiteOpenHelper
         public String m_filename;
     };
 
-    public class FilesToTagResult
-    {
+    public class FilesToTagResult {
         public long fileId;
         public String artist;
         public String album;
         public String title;
+    };
+    
+    public class TopTagsResult {
+    	public String tag;
+    	public float weight;
+    };
+
+    public class FilesWithTagResult {
+        public File file;
+        public FileMeta meta;
+        public float weight;
+        public RadioTrack toRadioTrack() {
+        	//	public RadioTrack(String locationUrl, String title, String identifier, String album, String creator, String duration, String imageUrl, String trackAuth, Boolean loved, String[] context) {
+        	return new RadioTrack(file.name(), meta.m_title, "", meta.m_album, meta.m_artist, String.valueOf(meta.m_duration), "", "", false, null);
+        }
     };
 }
