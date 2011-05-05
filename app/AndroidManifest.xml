@@ -32,6 +32,13 @@
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
+		<activity android:name="Boffin" android:configChanges="keyboardHidden" android:label="Boffin">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
+		<activity android:name=".activity.MediaScanner"/>
 		<receiver android:name=".LastFMMediaButtonHandler">
 			<intent-filter android:priority="32000">
 				<action android:name="android.intent.action.MEDIA_BUTTON" />
