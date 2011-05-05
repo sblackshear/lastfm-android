@@ -167,7 +167,7 @@ public class LastFMApplication extends Application {
 				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				startActivity( intent );
 			}
-		} else if (session != null && session.getKey().length() > 0) {
+		} else if (session != null && session.getKey().length() > 0 || url.startsWith("boffin-tag://")) {
 			final Intent out = new Intent(this, RadioPlayerService.class);
 			out.setAction("fm.last.android.PLAY");
 			out.putExtra("station", url);

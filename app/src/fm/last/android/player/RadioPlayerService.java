@@ -312,7 +312,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 				if(mState != STATE_STOPPED)
 					return;
 			}
-			if (stationURL != null && stationURL.length() > 0 && session != null) {
+			if (stationURL != null && stationURL.length() > 0 && (session != null || stationURL.startsWith("boffin-tag://"))) {
 				if(stationURL.startsWith("boffin-tag://")) {
 					try {
 						String tag = stationURL.substring(13);
