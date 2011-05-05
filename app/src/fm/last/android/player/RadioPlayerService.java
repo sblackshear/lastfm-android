@@ -127,6 +127,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 	private boolean lostDataConnection = false;
 	private static final int NOTIFY_ID = 1337;
 	private FadeVolumeTask mFadeVolumeTask = null;
+	private List<String> recentTracks = new ArrayList<String>(25);
 
 	public static final String META_CHANGED = "fm.last.android.metachanged";
 	public static final String PLAYBACK_FINISHED = "fm.last.android.playbackcomplete";
@@ -802,26 +803,34 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 			if(currentStationURL.startsWith("boffin-tag://")) {
 				String tag = currentStationURL.substring(13);
 				List<LocalCollection.FilesWithTagResult> files = LocalCollection.getInstance().filesWithTag(tag);
-				List<LocalCollection.FilesWithTagResult> sortedFiles = new ArrayList<LocalCollection.FilesWithTagResult>(10);
+				List<LocalCollection.FilesWithTagResult> sortedFiles = new ArrayList<LocalCollection.FilesWithTagResult>(20);
 				List<String> artists = new ArrayList<String>();
 				logger.info("Got " + files.size() + " tracks");
 				
 				for(int x = 0; x < 20; x++) {
-					float highestWeight = files.get(files.size() - 1).weight;
-					double p = Math.random() + 0.5;
-					if(p > 1)
-						p = 1;
-					
+					float totalWeight;
+					double p = Math.random();
+
+					totalWeight = 0;
 					Iterator<LocalCollection.FilesWithTagResult> i = files.iterator();
 					while(i.hasNext()) {
 						LocalCollection.FilesWithTagResult r = i.next();
-						if(p < (r.weight / highestWeight) && r.weight > 1 && !artists.contains(r.meta.m_artist)) {
+						totalWeight += r.weight;
+					}
+					
+					i = files.iterator();
+					while(i.hasNext()) {
+						LocalCollection.FilesWithTagResult r = i.next();
+						if(p < (r.weight / totalWeight) && r.weight > 1 && !recentTracks.contains(r.meta.m_album+r.meta.m_artist+r.meta.m_title) && !artists.contains(r.meta.m_artist)) {
 							sortedFiles.add(r);
 							artists.add(r.meta.m_artist);
+							recentTracks.add(r.meta.m_album+r.meta.m_artist+r.meta.m_title);
+							if(recentTracks.size() >= 25)
+								recentTracks.remove(0);
 							files.remove(r);
 							break;
 						} else {
-							p -= (r.weight / highestWeight);
+							p -= (r.weight / totalWeight);
 						}
 					}
 				}
@@ -831,6 +840,10 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 					LocalCollection.FilesWithTagResult r = i.next();
 					logger.info("Boffin track (weight = " + r.weight + "): " + r.meta.m_artist + " - " + r.meta.m_title);
 					currentQueue.add(r.toRadioTrack());
+				}
+				if(currentQueue.size() < 1 && recentTracks.size() > 1) {
+					recentTracks.clear();
+					refreshPlaylist();
 				}
 			} else {
 				String bitrate;
