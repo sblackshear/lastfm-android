@@ -151,6 +151,33 @@ public class LocalCollection extends SQLiteOpenHelper
 		}
 	}
 	
+	public File getFile(String artist, String title) {
+		String query = "SELECT files.id AS id, filename, modification_date FROM files " +
+			"INNER JOIN artists ON artists.id = files.artist " +
+			"WHERE lowercase_name = ? AND lowercase_title = ?";
+		SQLiteDatabase db = null;
+		Cursor c = null;
+		try {
+			db = getReadableDatabase();
+			c = db.rawQuery(query, new String[] { artist.toLowerCase(), title.toLowerCase() });
+			File result = null;
+			if (c.getCount() > 0) {
+				c.moveToFirst();				
+				result = new File(c.getLong(c.getColumnIndex("id")),
+							c.getString(c.getColumnIndex("filename")),
+							c.getInt(c.getColumnIndex("modification_date")));
+			}
+			c.close();
+			db.close();
+			return result;
+		} finally {
+			if(c != null)
+				c.close();
+			if(db != null)
+				db.close();
+		}
+	}
+	
 	public void removeFile(long id) {
 		SQLiteDatabase db = null;
 		try {

@@ -617,8 +617,13 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 				RadioWidgetProvider.updateAppWidget_playing(this, track.getTitle(), track.getCreator(), 0, 0, true, track.getLoved(), false);
 			}
 			if(track.getLocationUrl().contains("play.last.fm")) {
-				URL newURL = UrlUtil.getRedirectedUrl(new URL(track.getLocationUrl()));
-				track.setLocationUrl(newURL.toString());
+				LocalCollection.File f = LocalCollection.getInstance().getFile(track.getCreator(), track.getTitle());
+				if(f != null) {
+					track.setLocationUrl(f.name());
+				} else {
+					URL newURL = UrlUtil.getRedirectedUrl(new URL(track.getLocationUrl()));
+					track.setLocationUrl(newURL.toString());
+				}
 			}
 			logger.info("Streaming: " + track.getLocationUrl());
 			p.reset();
@@ -691,6 +696,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		}
 
 		mTrackPosition = 0;
+		bufferPercent = 0;
 		lostDataConnection = false;
 		mState = STATE_SKIPPING;
 		// Check if we're running low on tracks
