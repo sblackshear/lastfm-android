@@ -827,9 +827,17 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 					i = files.iterator();
 					while(i.hasNext()) {
 						LocalCollection.FilesWithTagResult r = i.next();
-						if(p < (r.weight / totalWeight) && r.weight > 1 && !recentTracks.contains(r.meta.m_album+r.meta.m_artist+r.meta.m_title) && !artists.contains(r.meta.m_artist)) {
+						float pushDown = 1.0f;
+						if(recentTracks.contains(r.meta.m_album+r.meta.m_artist+r.meta.m_title))
+							pushDown *= 0.001f;
+
+						if(artists.contains(r.meta.m_artist))
+							pushDown *= 0.001f;
+						if(p < ((r.weight * pushDown) / totalWeight) && r.weight > 1) {
 							sortedFiles.add(r);
 							artists.add(r.meta.m_artist);
+							if(artists.size() >= 5)
+								artists.remove(0);
 							recentTracks.add(r.meta.m_album+r.meta.m_artist+r.meta.m_title);
 							if(recentTracks.size() >= 25)
 								recentTracks.remove(0);
@@ -840,7 +848,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 						}
 					}
 				}
-				Collections.sort(sortedFiles, new SortByWeight());
+				//Collections.sort(sortedFiles, new SortByWeight());
 				Iterator<LocalCollection.FilesWithTagResult> i = sortedFiles.iterator();
 				while(i.hasNext()) {
 					LocalCollection.FilesWithTagResult r = i.next();

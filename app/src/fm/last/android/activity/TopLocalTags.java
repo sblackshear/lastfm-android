@@ -50,7 +50,7 @@ public class TopLocalTags extends ListActivity implements OnClickListener, TextW
 		mSearchText.setHint("Enter a tag");
 		
 		mSearchButton = (ImageButton)findViewById(R.id.search);
-		mSearchButton.setOnClickListener(this);
+		mSearchButton.setVisibility(View.GONE);
 		
 		mVoiceButton = (ImageButton)findViewById(R.id.voice);
 		// Check to see if a recognition activity is present
