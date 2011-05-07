@@ -130,8 +130,8 @@ public abstract class AsyncTaskEx<Params, Progress, Result> {
     private static final String LOG_TAG = "AsyncTaskEx";
 
     private static final int CORE_POOL_SIZE = 5;
-    private static final int MAXIMUM_POOL_SIZE = 10;
-    private static final int KEEP_ALIVE = 10;
+    private static final int MAXIMUM_POOL_SIZE = 25;
+    private static final int KEEP_ALIVE = 25;
 
     private static final LinkedBlockingQueue<Runnable> sWorkQueue =
             new LinkedBlockingQueue<Runnable>();

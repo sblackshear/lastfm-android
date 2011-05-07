@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import fm.last.android.LastFMApplication;
 import fm.last.api.RadioTrack;
@@ -12,7 +11,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 public class LocalCollection extends SQLiteOpenHelper 
 {
@@ -210,6 +208,7 @@ public class LocalCollection extends SQLiteOpenHelper
 				ContentValues values = new ContentValues();
 				values.put("lowercase_name", artistName.toLowerCase());
 				result = (int)db.insertOrThrow("artists", null, values);
+				callback.artistAdded(artistName.toLowerCase());
 				return result;
 			}
 		} finally {
@@ -296,6 +295,7 @@ public class LocalCollection extends SQLiteOpenHelper
 				ContentValues values = new ContentValues();
 				values.put("name", tag.toLowerCase());
 				result = (int)db.insertOrThrow("tags", null, values);
+				callback.tagAdded(tag.toLowerCase());
 				return result;
 			}
 		} finally {
@@ -358,7 +358,6 @@ public class LocalCollection extends SQLiteOpenHelper
 				ContentValues values = new ContentValues();
 				values.put("tag_time", time);
 				db.update("files", values, "id = ?", new String[] { String.valueOf(fileIds.get(i)) });
-				callback.localCollectionProgress(i, fileIds.size());
 			}
 			db.setTransactionSuccessful();
 		} finally {
@@ -446,6 +445,8 @@ public class LocalCollection extends SQLiteOpenHelper
 
 	public interface LocalCollectionProgressCallback {
 		public void localCollectionProgress(int current, int total);
+		public void artistAdded(String artist);
+		public void tagAdded(String tag);
 	}
 	
     public class File {

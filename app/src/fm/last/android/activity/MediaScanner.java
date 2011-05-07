@@ -34,34 +34,67 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.Window;
-import android.widget.ScrollView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import fm.last.android.AndroidLastFmServerFactory;
 import fm.last.android.R;
 import fm.last.android.db.LocalCollection;
 import fm.last.android.db.LocalCollection.FilesToTagResult;
 import fm.last.android.db.LocalCollection.LocalCollectionProgressCallback;
 import fm.last.android.utils.AsyncTaskEx;
+import fm.last.android.widget.AlbumArt;
+import fm.last.api.Artist;
 import fm.last.util.UrlUtil;
 
 public class MediaScanner extends Activity implements LocalCollectionProgressCallback {
 
-	private TextView mFileList;
-	private ScrollView mFileListContainer;
+	private TextView mActivityName;
+	private ProgressBar mProgress;
 	LocalCollection collection;
+	private AlbumArt[][] mArtistImages = new AlbumArt[5][4];
+	private TextView mTagLabel;
+	private long lastArtistFetch = 0;
+	private long lastTagFetch = 0;
+	int artist_x = -1; //omghax
+	int artist_y = 0;
+	int artistCount = 0;
 
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
-		requestWindowFeature(Window.FEATURE_PROGRESS);
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.media_scanner);
-		setTitle("Boffin: Media Scanner");
 
-		mFileList = (TextView) findViewById(R.id.fileList);
-		mFileListContainer = (ScrollView) findViewById(R.id.fileListContainer);
-
+		mActivityName = (TextView) findViewById(R.id.activityName);
+		mProgress = (ProgressBar) findViewById(R.id.progress);
+		mTagLabel = (TextView) findViewById(R.id.tagLabel);
+		
+		mArtistImages[0][0] = (AlbumArt) findViewById(R.id.artistImage1_1);
+		mArtistImages[0][1] = (AlbumArt) findViewById(R.id.artistImage1_2);
+		mArtistImages[0][2] = (AlbumArt) findViewById(R.id.artistImage1_3);
+		mArtistImages[0][3] = (AlbumArt) findViewById(R.id.artistImage1_4);
+		
+		mArtistImages[1][0] = (AlbumArt) findViewById(R.id.artistImage2_1);
+		mArtistImages[1][1] = (AlbumArt) findViewById(R.id.artistImage2_2);
+		mArtistImages[1][2] = (AlbumArt) findViewById(R.id.artistImage2_3);
+		mArtistImages[1][3] = (AlbumArt) findViewById(R.id.artistImage2_4);
+		
+		mArtistImages[2][0] = (AlbumArt) findViewById(R.id.artistImage3_1);
+		mArtistImages[2][1] = (AlbumArt) findViewById(R.id.artistImage3_2);
+		mArtistImages[2][2] = (AlbumArt) findViewById(R.id.artistImage3_3);
+		mArtistImages[2][3] = (AlbumArt) findViewById(R.id.artistImage3_4);
+		
+		mArtistImages[3][0] = (AlbumArt) findViewById(R.id.artistImage4_1);
+		mArtistImages[3][1] = (AlbumArt) findViewById(R.id.artistImage4_2);
+		mArtistImages[3][2] = (AlbumArt) findViewById(R.id.artistImage4_3);
+		mArtistImages[3][3] = (AlbumArt) findViewById(R.id.artistImage4_4);
+		
+		mArtistImages[4][0] = (AlbumArt) findViewById(R.id.artistImage5_1);
+		mArtistImages[4][1] = (AlbumArt) findViewById(R.id.artistImage5_2);
+		mArtistImages[4][2] = (AlbumArt) findViewById(R.id.artistImage5_3);
+		mArtistImages[4][3] = (AlbumArt) findViewById(R.id.artistImage5_4);
+		
 		collection = LocalCollection.getInstance();
 		collection.callback = this;
 		//collection.clearDatabase();
@@ -93,25 +126,87 @@ public class MediaScanner extends Activity implements LocalCollectionProgressCal
 		}
 		
 	    public void run() {
-	    	setProgressBarIndeterminateVisibility(indeterminate);
-    		setProgressBarIndeterminate(indeterminate);
-	    	if(!indeterminate)
-	    		setProgress(progress);
+    		mProgress.setProgress(progress);
+	    	mProgress.setIndeterminate(indeterminate);
 	    }
 	}
 	
+	class TagRunnable implements Runnable {
+		String name;
+		
+		public TagRunnable(String n) {
+			name = n;
+		}
+		
+	    public void run() {
+	    	mTagLabel.setText(name);
+	    }
+	}
+
 	public void localCollectionProgress(int current, int total) {
-		Log.i("Last.fm", "Progress: " + current + " / " + total);
-		int progress = (int)((float)current * (10000.0f / (float)total));
+		int progress = (int)((float)current * (100.0f / (float)total));
 		runOnUiThread(new ProgressRunnable(progress, false));
 	}
 
+	public void artistAdded(String name) {
+		runOnUiThread(new TagRunnable(name));
+		if(System.currentTimeMillis() > (lastArtistFetch + 500) || (++artistCount < 20)) {
+			new ArtistFetchTask(name).execute((Void)null);
+			lastArtistFetch = System.currentTimeMillis();
+		}
+	}
+	
+	public void tagAdded(String name) {
+		if(System.currentTimeMillis() > (lastTagFetch + 500)) {
+			runOnUiThread(new TagRunnable(name));
+			lastTagFetch = System.currentTimeMillis();
+		}
+	}
+	
 	private class MediaObject {
 		public String title;
 		public String artist;
 		public String album;
 		public long duration;
 		public long modified;
+	}
+	
+	private class ArtistFetchTask extends AsyncTaskEx<Void, Void, String> {
+		private String artist = "";
+		
+		public ArtistFetchTask(String a) {
+			artist = a;
+		}
+		
+		@Override
+		public String doInBackground(Void... params) {
+			try {
+				Artist a = AndroidLastFmServerFactory.getServer().getArtistInfo(artist, "", "", "");
+				return a.getURLforImageSize("medium");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		public void onPostExecute(String result) {
+			if(result != null) {
+				int x = (int)(Math.random() * 4);
+				int y = (int)(Math.random() * 5);
+				if(artist_y * 4 + artist_x < 20) {
+					if(++artist_x > 3) {
+						artist_y++;
+						artist_x = 0;
+					}
+					x = artist_x;
+					if(artist_y < 5)
+						y = artist_y;
+				}
+				if(!mArtistImages[y][x].isRunning())
+					mArtistImages[y][x].fetch(result, false);
+			}
+		}
 	}
 	
 	private class MediaScannerTask extends AsyncTaskEx<Void, String, Void> {
@@ -135,7 +230,8 @@ public class MediaScanner extends Activity implements LocalCollectionProgressCal
 		
 		@Override
 		public void onPreExecute() {
-			mFileList.setText("--- Scanning Media Library ---\n");
+			runOnUiThread(new ProgressRunnable(0, false));
+			mActivityName.setText("Scanning Your Music");
 		}
 		
 		@Override
@@ -185,12 +281,7 @@ public class MediaScanner extends Activity implements LocalCollectionProgressCal
 		}
 
 		protected void onProgressUpdate(String... progress) {
-			mFileList.setText(mFileList.getText() + progress[0] + "\n");
-			mFileListContainer.post(new Runnable() { 
-			    public void run() { 
-			    	mFileListContainer.scrollTo(0, mFileList.getHeight()); 
-			    } 
-			}); 				
+			mActivityName.setText(progress[0]);
 		}
 		
 		@Override
@@ -204,18 +295,18 @@ public class MediaScanner extends Activity implements LocalCollectionProgressCal
 		
 		@Override
 		public void onPreExecute() {
-			mFileList.setText(mFileList.getText() + "--- Analyzing Songs ---\n");
+			mActivityName.setText("Analyzing Your Music");
+			runOnUiThread(new TagRunnable(""));
 		}
 		
 		private void doResolveQuery(String postData) throws MalformedURLException, IOException {
 			List<Long> fileIds = new ArrayList<Long>();
 			List<String> tags = new ArrayList<String>();
 			List<Float> weights = new ArrayList<Float>();
+			publishProgress("Waiting for Last.fm");
 			runOnUiThread(new ProgressRunnable(0, true));
-			publishProgress("-- Waiting for results from Last.fm --");
 			String response = UrlUtil.doPost(new URL("http://musiclookup.last.fm/trackresolve"), postData);
-			runOnUiThread(new ProgressRunnable(10000, false));
-			publishProgress("-- Processing results --");
+			publishProgress("Processing Results");
 			String[] items = response.split("\n");
 			for(int x = 0; x < items.length; x++) {
 				String[] fields = items[x].split("\t");
@@ -225,9 +316,10 @@ public class MediaScanner extends Activity implements LocalCollectionProgressCal
 					weights.add(Float.parseFloat(fields[y+1]));
 				}
 			}
-			publishProgress("-- Resolving tags --");
+			publishProgress("Tagging Your Music");
+			runOnUiThread(new ProgressRunnable(0, false));
 			List<Long>tagIds = collection.resolveTags(tags, tagmap);
-			publishProgress("-- Storing tags in database --");
+			publishProgress("Saving Tags");
 			collection.updateTrackTags(fileIds, tagIds, weights);
 		}
 		
@@ -253,7 +345,7 @@ public class MediaScanner extends Activity implements LocalCollectionProgressCal
 							count = 0;
 						}
 					}
-					publishProgress("-- Updating timestamps --");
+					runOnUiThread(new ProgressRunnable(0, true));
 					collection.updateFileTagTime(fileIds);
 				}				
 			} catch (Exception e) {
@@ -263,18 +355,12 @@ public class MediaScanner extends Activity implements LocalCollectionProgressCal
 		}
 
 		protected void onProgressUpdate(String... progress) {
-			mFileList.setText(mFileList.getText() + progress[0] + "\n");
-			mFileListContainer.post(new Runnable() { 
-			    public void run() { 
-			    	mFileListContainer.scrollTo(0, mFileList.getHeight()); 
-			    } 
-			}); 				
+			mActivityName.setText(progress[0]);
 		}
 		
 		@Override
 		public void onPostExecute(Void result) {
-			publishProgress("--- Database update complete ---");
-			runOnUiThread(new ProgressRunnable(10000, false));
+			publishProgress("Database update complete");
 			Intent intent = new Intent(MediaScanner.this, TopLocalTags.class);
 			startActivity(intent);
 			finish();

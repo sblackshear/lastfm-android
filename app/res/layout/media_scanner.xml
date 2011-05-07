@@ -2,8 +2,49 @@
 <LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="fill_parent"
-  android:layout_height="fill_parent">
-  <ScrollView android:layout_height="fill_parent" android:layout_width="fill_parent" android:id="@+id/fileListContainer">
-    <TextView android:text="" android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/fileList" android:singleLine="false" android:textColor="#fff"></TextView>
-  </ScrollView>
+  android:layout_height="fill_parent" android:background="#fff" android:padding="6dip" android:orientation="vertical">
+  <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:paddingBottom="6dip">
+      <ImageView android:layout_width="wrap_content" android:src="@drawable/icon" android:layout_height="wrap_content"></ImageView>
+      <TextView android:textColor="#000" android:textSize="20dip" android:id="@+id/activityName" android:textStyle="bold" android:gravity="center" android:text="Scanning Your Music" android:layout_width="match_parent" android:layout_height="fill_parent"></TextView>
+  </LinearLayout>
+  <ProgressBar style="@android:style/Widget.ProgressBar.Horizontal" android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/progress" android:indeterminateBehavior="repeat" android:indeterminate="true"></ProgressBar>
+  <TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_margin="2dip" android:gravity="center" android:id="@+id/tagLabel" android:textColor="#ccc" android:textStyle="bold" android:lines="1" android:maxLines="1" android:textSize="20dip"></TextView>
+  <TableLayout android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_gravity="center"
+					android:gravity="center">
+  	<TableRow android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_gravity="center"
+					android:gravity="center">
+					<fm.last.android.widget.AlbumArt android:layout_width="64dip" android:layout_height="64dip" android:id="@+id/artistImage1_1" android:src="@drawable/no_artwork" android:scaleType="centerCrop" android:layout_margin="2dip"/>
+					<fm.last.android.widget.AlbumArt android:layout_width="64dip" android:layout_height="64dip" android:id="@+id/artistImage1_2" android:src="@drawable/no_artwork" android:scaleType="centerCrop" android:layout_margin="2dip"/>
+					<fm.last.android.widget.AlbumArt android:layout_width="64dip" android:layout_height="64dip" android:id="@+id/artistImage1_3" android:src="@drawable/no_artwork" android:scaleType="centerCrop" android:layout_margin="2dip"/>
+					<fm.last.android.widget.AlbumArt android:layout_width="64dip" android:layout_height="64dip" android:id="@+id/artistImage1_4" android:src="@drawable/no_artwork" android:scaleType="centerCrop" android:layout_margin="2dip"/>
+  	</TableRow>
+  	<TableRow android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_gravity="center"
+					android:gravity="center">
+					<fm.last.android.widget.AlbumArt android:layout_width="64dip" android:layout_height="64dip" android:id="@+id/artistImage2_1" android:src="@drawable/no_artwork" android:scaleType="centerCrop" android:layout_margin="2dip"/>
+					<fm.last.android.widget.AlbumArt android:layout_width="64dip" android:layout_height="64dip" android:id="@+id/artistImage2_2" android:src="@drawable/no_artwork" android:scaleType="centerCrop" android:layout_margin="2dip"/>
+					<fm.last.android.widget.AlbumArt android:layout_width="64dip" android:layout_height="64dip" android:id="@+id/artistImage2_3" android:src="@drawable/no_artwork" android:scaleType="centerCrop" android:layout_margin="2dip"/>
+					<fm.last.android.widget.AlbumArt android:layout_width="64dip" android:layout_height="64dip" android:id="@+id/artistImage2_4" android:src="@drawable/no_artwork" android:scaleType="centerCrop" android:layout_margin="2dip"/>
+  	</TableRow>
+  	<TableRow android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_gravity="center"
+					android:gravity="center">
+					<fm.last.android.widget.AlbumArt android:layout_width="64dip" android:layout_height="64dip" android:id="@+id/artistImage3_1" android:src="@drawable/no_artwork" android:scaleType="centerCrop" android:layout_margin="2dip"/>
+					<fm.last.android.widget.AlbumArt android:layout_width="64dip" android:layout_height="64dip" android:id="@+id/artistImage3_2" android:src="@drawable/no_artwork" android:scaleType="centerCrop" android:layout_margin="2dip"/>
+					<fm.last.android.widget.AlbumArt android:layout_width="64dip" android:layout_height="64dip" android:id="@+id/artistImage3_3" android:src="@drawable/no_artwork" android:scaleType="centerCrop" android:layout_margin="2dip"/>
+					<fm.last.android.widget.AlbumArt android:layout_width="64dip" android:layout_height="64dip" android:id="@+id/artistImage3_4" android:src="@drawable/no_artwork" android:scaleType="centerCrop" android:layout_margin="2dip"/>
+  	</TableRow>
+  	<TableRow android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_gravity="center"
+					android:gravity="center">
+					<fm.last.android.widget.AlbumArt android:layout_width="64dip" android:layout_height="64dip" android:id="@+id/artistImage4_1" android:src="@drawable/no_artwork" android:scaleType="centerCrop" android:layout_margin="2dip"/>
+					<fm.last.android.widget.AlbumArt android:layout_width="64dip" android:layout_height="64dip" android:id="@+id/artistImage4_2" android:src="@drawable/no_artwork" android:scaleType="centerCrop" android:layout_margin="2dip"/>
+					<fm.last.android.widget.AlbumArt android:layout_width="64dip" android:layout_height="64dip" android:id="@+id/artistImage4_3" android:src="@drawable/no_artwork" android:scaleType="centerCrop" android:layout_margin="2dip"/>
+					<fm.last.android.widget.AlbumArt android:layout_width="64dip" android:layout_height="64dip" android:id="@+id/artistImage4_4" android:src="@drawable/no_artwork" android:scaleType="centerCrop" android:layout_margin="2dip"/>
+  	</TableRow>
+  	<TableRow android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_gravity="center"
+					android:gravity="center">
+					<fm.last.android.widget.AlbumArt android:layout_width="64dip" android:layout_height="64dip" android:id="@+id/artistImage5_1" android:src="@drawable/no_artwork" android:scaleType="centerCrop" android:layout_margin="2dip"/>
+					<fm.last.android.widget.AlbumArt android:layout_width="64dip" android:layout_height="64dip" android:id="@+id/artistImage5_2" android:src="@drawable/no_artwork" android:scaleType="centerCrop" android:layout_margin="2dip"/>
+					<fm.last.android.widget.AlbumArt android:layout_width="64dip" android:layout_height="64dip" android:id="@+id/artistImage5_3" android:src="@drawable/no_artwork" android:scaleType="centerCrop" android:layout_margin="2dip"/>
+					<fm.last.android.widget.AlbumArt android:layout_width="64dip" android:layout_height="64dip" android:id="@+id/artistImage5_4" android:src="@drawable/no_artwork" android:scaleType="centerCrop" android:layout_margin="2dip"/>
+  	</TableRow>
+  </TableLayout>
 </LinearLayout>

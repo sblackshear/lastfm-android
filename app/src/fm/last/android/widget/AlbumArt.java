@@ -58,13 +58,25 @@ public class AlbumArt extends ImageView {
 	}
 
 	public void fetch(String URL) {
-		setImageBitmap(_defaultImage);
+		fetch(URL, true);
+	}
+
+	public void fetch(String URL, boolean clear) {
+		if(clear)
+			setImageBitmap(_defaultImage);
 
 		if (_fetchTask != null)
 			_fetchTask.cancel(true);
 
 		_fetchTask = new FetchArtTask(URL);
 		_fetchTask.execute((Void) null);
+	}
+	
+	public boolean isRunning() {
+		if(_fetchTask != null)
+			return(!_fetchTask.isCancelled());
+		else 
+			return false;
 	}
 
 	private class FetchArtTask extends AsyncTaskEx<Void, Void, Boolean> {
