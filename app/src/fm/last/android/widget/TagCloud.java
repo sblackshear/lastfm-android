@@ -38,6 +38,7 @@ import android.view.animation.Animation.AnimationListener;
 import android.widget.TextView;
 import fm.last.android.LastFMApplication;
 import fm.last.android.R;
+import fm.last.android.db.LocalCollection.TopTagsResult;
 
 /**
  * Layout/container for TagButtons
@@ -50,7 +51,7 @@ public class TagCloud extends ViewGroup {
 
 	TagLayoutListener mListener;
 
-	Map<String, TextView> mTagButtons;
+	TreeMap<Float, TextView> mTagButtons;
 	TextView mAreaHint;
 
 	/**
@@ -94,8 +95,8 @@ public class TagCloud extends ViewGroup {
 	 * @param context
 	 */
 	private void init(Context context) {
-		mTagButtons = new TreeMap<String, TextView>();
-		mPadding = 5; // TODO get from xml layout
+		mTagButtons = new TreeMap<Float, TextView>();
+		mPadding = 10; // TODO get from xml layout
 		mAnimationEnabled = false;
 		mAnimating = false;
 
@@ -116,21 +117,24 @@ public class TagCloud extends ViewGroup {
 	public void normalizeSizes() {
 		float max = 0.0f;
 		float min = Float.POSITIVE_INFINITY;
-		for (TextView tv : mTagButtons.values()) {
-			if( tv.getTextSize() < min ) {
-				min = tv.getTextSize();
+		for (Float weight : mTagButtons.keySet()) {
+			if( weight < min ) {
+				min = weight;
 			}
-			if( tv.getTextSize() > max ) {
-				max = tv.getTextSize();
+			if( weight > max ) {
+				max = weight;
 			}
 		}
 		
-		float minFontSize = 12.0f;
-		float maxFontSize = 30.0f;
-		float multiplier = (maxFontSize-minFontSize)/(max-min);  
-		for (TextView tv : mTagButtons.values()) {
-			float weight = minFontSize + ((max-(max-(tv.getTextSize()-min)))*multiplier);  
-			tv.setTextSize( weight );
+		float minFontSize = 10.0f;
+		float maxFontSize = 100.0f;
+		float multiplier = (maxFontSize-minFontSize)/(max-min);
+		for (Map.Entry<Float, TextView> entry : mTagButtons.entrySet()) {
+			float weight = entry.getKey();
+			TextView tv = entry.getValue();
+			float fontSize = minFontSize + (float)Math.log(0.01+(max-(max-(weight-min)))*multiplier);  
+			tv.setTextSize( fontSize * 1.5f );
+			Log.d(TAG, "Sizing: " + tv.getText() + "Weight: " + weight + " Size:" + tv.getTextSize());
 		}
 	}
 
@@ -139,17 +143,17 @@ public class TagCloud extends ViewGroup {
 	 * 
 	 * @param tag
 	 */
-	public void addTag(final String tag, float weight) {
+	public void addTag(final TopTagsResult r ) {
 		final TextView tagButton = new TextView(this.getContext());
 		LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		tagButton.setTextColor(Color.BLACK);
-		tagButton.setTextSize(weight);
-		tagButton.setText(tag);
+		tagButton.setTextSize(r.weight);
+		tagButton.setText(r.tag);
 
 		tagButton.setOnClickListener(new OnClickListener() {
 
 			public void onClick(View v) {
-				LastFMApplication.getInstance().playRadioStation(TagCloud.this.getContext(), "boffin-tag://" + tag, true);
+				LastFMApplication.getInstance().playRadioStation(TagCloud.this.getContext(), "boffin-tag://" + r.tag, true);
 			}
 
 		});
@@ -157,7 +161,7 @@ public class TagCloud extends ViewGroup {
 			tagButton.setVisibility(View.INVISIBLE);
 		}
 
-		mTagButtons.put(tag, tagButton);
+		mTagButtons.put(r.weight, tagButton);
 		this.addView(tagButton, params);
 
 		if (mAnimationEnabled) {
@@ -183,49 +187,6 @@ public class TagCloud extends ViewGroup {
 		mTagButtons.clear();
 	}
 
-	/**
-	 * Removes TagButton from TagLayout
-	 * 
-	 * @param tag
-	 */
-	private void removeTag(final String tag) {
-		if (!mAnimationEnabled) {
-			reallyRemoveTag(tag);
-			return;
-		}
-
-		TextView tb = mTagButtons.get(tag);
-		Animation a = AnimationUtils.loadAnimation(this.getContext(), R.anim.tag_fadeout);
-		a.setAnimationListener(new AnimationListener() {
-
-			public void onAnimationEnd(Animation animation) {
-				mAnimating = false;
-				TagCloud.this.requestLayout();
-			}
-
-			public void onAnimationRepeat(Animation animation) {
-			}
-
-			public void onAnimationStart(Animation animation) {
-			}
-
-		});
-		mAnimating = true;
-		tb.startAnimation(a);
-		reallyRemoveTag(tag);
-	}
-
-	/**
-	 * Sharable part of code, which really removes the tag
-	 * 
-	 * @param tag
-	 */
-	private void reallyRemoveTag(String tag) {
-		this.removeView(mTagButtons.remove(tag));
-		if (mListener != null) {
-			mListener.tagRemoved(tag);
-		}
-	}
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -256,7 +217,7 @@ public class TagCloud extends ViewGroup {
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		Log.i(TAG, "onLayout()");
-		if (mAnimating) {
+		if (mAnimationEnabled && mAnimating) {
 			return;
 		}
 
@@ -267,7 +228,7 @@ public class TagCloud extends ViewGroup {
 		int y = mPadding;
 		int maxHeight = 0;
 
-		for (Map.Entry<String, TextView> entry : mTagButtons.entrySet()) {
+		for (Map.Entry<Float, TextView> entry : mTagButtons.descendingMap().entrySet()) {
 			TextView child = entry.getValue();
 
 			int cw = child.getMeasuredWidth();
@@ -275,7 +236,7 @@ public class TagCloud extends ViewGroup {
 			
 			if( ch > maxHeight ) maxHeight = ch;
 			
-			Log.i(TAG, "child(" + entry.getKey() + ") size - " + cw + "," + ch);
+			Log.i(TAG, "child(" + entry.getValue().getText() + ") size - " + cw + "," + ch);
 
 			// tag doesn't fit the row, move it to next one
 			if (x + cw > selfw) {

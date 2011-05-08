@@ -16,6 +16,7 @@ import fm.last.android.widget.TagCloud;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
@@ -48,7 +49,7 @@ public class LocalTagCloud extends Activity implements OnClickListener, TextWatc
 		mTagCloud = new TagCloud(this);
 		setTitle("Boffin: Top Tags");
 		setContentView(R.layout.search);
-
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT); 
 		LinearLayout layout = (LinearLayout)findViewById(R.id.layout);
 		layout.removeAllViews();
 		//ScrollView sv = new ScrollView( this );
@@ -58,10 +59,11 @@ public class LocalTagCloud extends Activity implements OnClickListener, TextWatc
         List<TopTagsResult> topTags = LocalCollection.getInstance().getTopTags(80);
         List<String> tagsList = new ArrayList<String>(topTags.size());
         Iterator<TopTagsResult> i = topTags.iterator();
+        mTagCloud.clear();
         while(i.hasNext()) {
         	TopTagsResult r = i.next();
         	//tagsList.add(r.tag);
-        	mTagCloud.addTag(r.tag, r.weight);
+        	mTagCloud.addTag(r);
         }
         mTagCloud.normalizeSizes();
 		mSearchText = (EditText)findViewById(R.id.station_editbox);
