@@ -187,7 +187,7 @@ public class LastFMApplication extends Application {
 						} catch (Exception e) {
 							e.printStackTrace(); //Sometimes this can throw an IllegalArgumentException
 						}
-							
+						
 						String action = intent.getAction();
 						if (action.equals(RadioPlayerService.STATION_CHANGED)) {
 							Intent i = new Intent(LastFMApplication.this, Player.class);

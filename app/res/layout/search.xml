@@ -6,7 +6,7 @@
 		android:background="@drawable/tab_bar_rest"
 		android:layout_width="fill_parent"
 		android:layout_below="@+id/TabBar"
-		android:layout_height="wrap_content" android:paddingTop="4dip">
+		android:layout_height="wrap_content" android:paddingTop="4dip" android:animationCache="true">
 	<EditText android:id="@+id/station_editbox"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
@@ -39,13 +39,8 @@
 		android:src="@drawable/voice"/>
  	</LinearLayout>
 	
-	<LinearLayout android:layout_below="@id/SearchBar" android:layout_height="fill_parent" android:layout_width="fill_parent" android:orientation="vertical" android:background="#ebebeb">
-		<ImageView 
-			android:layout_width="wrap_content" 
-			android:layout_height="wrap_content"
-			android:src="@drawable/station_starter_logo"
-			android:layout_gravity="center"
-			android:layout_marginTop="80dip"/>
+	<LinearLayout android:layout_below="@id/SearchBar" android:layout_height="fill_parent" android:layout_width="fill_parent" android:orientation="vertical" android:background="#ebebeb" android:id="@+id/layout">
+		<ImageView android:layout_width="wrap_content" android:src="@drawable/station_starter_logo" android:layout_marginTop="80dip" android:layout_height="wrap_content" android:layout_gravity="center" android:id="@+id/imageView1"></ImageView>
 	</LinearLayout>
 	<ListView android:id="@android:id/list" android:layout_width="fill_parent"
 		android:layout_below="@+id/SearchBar"

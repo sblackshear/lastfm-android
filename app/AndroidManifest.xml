@@ -298,5 +298,11 @@
 			<meta-data android:name="android.provider.CONTACTS_STRUCTURE"
 				android:resource="@xml/contacts" />
 		</service>
+		<activity android:name=".activity.LocalTagCloud">
+			<intent-filter>
+				<category android:name="android.intent.category.DEFAULT"></category>
+				<action android:name="android.intent.action.VIEW"></action>
+			</intent-filter>
+		</activity>
 	</application>
 </manifest>

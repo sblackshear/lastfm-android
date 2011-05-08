@@ -360,8 +360,10 @@ public class MediaScanner extends Activity implements LocalCollectionProgressCal
 		
 		@Override
 		public void onPostExecute(Void result) {
+			publishProgress("--- Database update complete ---");
+			runOnUiThread(new ProgressRunnable(10000, false));
 			publishProgress("Database update complete");
-			Intent intent = new Intent(MediaScanner.this, TopLocalTags.class);
+			Intent intent = new Intent(MediaScanner.this, LocalTagCloud.class);
 			startActivity(intent);
 			finish();
 		}
