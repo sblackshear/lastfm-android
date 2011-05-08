@@ -78,7 +78,7 @@ public class LocalTagCloud extends Activity implements OnClickListener {
 			File sdCard = Environment.getExternalStorageDirectory();
 			File dir = new File (sdCard.getAbsolutePath() + "/Music");
 			dir.mkdirs();
-			String filename = "Music tagged ";
+			String filename = "";
 			for(int x = 0; x < tags.length; x++) {
 				if(x >= 1 && !(x == 1 && tags.length == 2))
 					filename += ", ";
