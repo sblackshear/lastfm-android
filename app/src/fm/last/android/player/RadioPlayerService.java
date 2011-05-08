@@ -316,7 +316,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 					try {
 						String tag = stationURL.substring(13);
 						logger.info("Boffin radio tag: " + tag);
-						currentStation = new Station(tag + " Tag Radio", stationURL, "boffin-tag", "0");
+						currentStation = new Station("Music tagged " + tag, stationURL, "boffin-tag", "0");
 						currentStationURL = stationURL;
 						mState = STATE_TUNING;
 						currentQueue.clear();
@@ -807,7 +807,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		try {
 			if(currentStationURL.startsWith("boffin-tag://")) {
 				String[] tags = currentStationURL.substring(13).split("\\*");
-				List<LocalCollection.FilesWithTagResult> files = LocalCollection.getInstance().getFilesWithTags(tags);
+				List<LocalCollection.FilesWithTagResult> files = LocalCollection.getInstance().getFilesWithTags(tags, 20);
 				Iterator<LocalCollection.FilesWithTagResult> i = files.iterator();
 				while(i.hasNext()) {
 					LocalCollection.FilesWithTagResult r = i.next();

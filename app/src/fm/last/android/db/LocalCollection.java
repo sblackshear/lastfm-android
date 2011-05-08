@@ -471,13 +471,25 @@ public class LocalCollection extends SQLiteOpenHelper
 
 	private List<String> recentTracks = new ArrayList<String>(25);
 
-	public List<FilesWithTagResult> getFilesWithTags(String[] tags) {
+	public List<FilesWithTagResult> getFilesWithTags(String[] tags, int count) {
 		String tag = tags[0];
 		List<LocalCollection.FilesWithTagResult> files = LocalCollection.getInstance().filesWithTag(tag);
 		List<LocalCollection.FilesWithTagResult> result = new ArrayList<LocalCollection.FilesWithTagResult>(20);
 		List<String> artists = new ArrayList<String>();
+
+		if(tags.length > 1) {
+			for(int t = 1; t < tags.length; t++) {
+				Iterator<LocalCollection.FilesWithTagResult>i = new ArrayList<LocalCollection.FilesWithTagResult>(files).iterator();
+				while(i.hasNext()) {
+					LocalCollection.FilesWithTagResult r = i.next();
+					if(!LocalCollection.getInstance().fileHasTag(r.file.id(), tags[t])) {
+						files.remove(r);
+					}
+				}
+			}
+		}
 		
-		for(int x = 0; x < 20; x++) {
+		for(int x = 0; x < count; x++) {
 			float totalWeight;
 			double p = Math.random();
 
@@ -498,15 +510,8 @@ public class LocalCollection extends SQLiteOpenHelper
 				if(artists.contains(r.meta.m_artist))
 					pushDown *= 0.001f;
 				
-				boolean match = true;
-				for(int t = 1; t < tags.length; t++) {
-					if(!LocalCollection.getInstance().fileHasTag(r.file.id(), tags[t])) {
-						match = false;
-						break;
-					}
-				}
 				
-				if(match && (p < ((r.weight * pushDown) / totalWeight) && r.weight > 1)) {
+				if(p < ((r.weight * pushDown) / totalWeight) && r.weight > 1) {
 					result.add(r);
 					artists.add(r.meta.m_artist);
 					if(artists.size() >= 5)
@@ -520,13 +525,10 @@ public class LocalCollection extends SQLiteOpenHelper
 					p -= (r.weight / totalWeight);
 				}
 			}
-			if(p <= 0) {
-				break;
-			}
 		}
 		if(result.size() < 1 && recentTracks.size() > 1) {
 			recentTracks.clear();
-			return getFilesWithTags(tags);
+			return getFilesWithTags(tags, count);
 		}
 		return result;
 	}

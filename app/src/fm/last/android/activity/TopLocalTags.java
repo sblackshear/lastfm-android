@@ -1,5 +1,8 @@
 package fm.last.android.activity;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -15,10 +18,13 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.speech.RecognizerIntent;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
@@ -70,6 +76,43 @@ public class TopLocalTags extends ListActivity implements OnClickListener, TextW
         getListView().setVisibility(View.VISIBLE);
     }
 	
+	private void createPlaylistForTags(String[] tags) {
+		List<LocalCollection.FilesWithTagResult> files = LocalCollection.getInstance().getFilesWithTags(tags, 100);
+		Log.i("Last.fm", "Got " + files.size() + " tracks");
+		if(files.size() > 0) {
+			File sdCard = Environment.getExternalStorageDirectory();
+			File dir = new File (sdCard.getAbsolutePath() + "/Music");
+			dir.mkdirs();
+			String filename = "Music tagged ";
+			for(int x = 0; x < tags.length; x++) {
+				if(x >= 1 && !(x == 1 && tags.length == 2))
+					filename += ", ";
+				if(x > 0 && x == tags.length - 1) {
+					if(x == 1)
+						filename += " ";
+					filename += "and ";
+				}
+				filename += tags[x];
+			}
+			filename += ".m3u";
+			File file = new File(dir, filename);
+			try {
+				FileOutputStream f = new FileOutputStream(file);
+				Iterator<LocalCollection.FilesWithTagResult> i = files.iterator();
+				while(i.hasNext()) {
+					LocalCollection.FilesWithTagResult r = i.next();
+					f.write((r.file.name() + "\n").getBytes());
+					Log.i("Last.fm", r.file.name() + "\n");
+				}
+				f.close();
+				sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	private void search() {
 		String query = mSearchText.getText().toString();
 		if(query.length() > 0) {
@@ -89,7 +132,8 @@ public class TopLocalTags extends ListActivity implements OnClickListener, TextW
 	}
 	
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		LastFMApplication.getInstance().playRadioStation(this, "boffin-tag://" + adapter.getItem(position), true);
+		createPlaylistForTags(new String[] { (String)adapter.getItem(position), "90s", "female vocalists" });
+		//LastFMApplication.getInstance().playRadioStation(this, "boffin-tag://" + adapter.getItem(position), true);
 	}
 	
 	public void onClick(View v) {

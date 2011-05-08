@@ -364,6 +364,7 @@ public class MediaScanner extends Activity implements LocalCollectionProgressCal
 			runOnUiThread(new ProgressRunnable(10000, false));
 			publishProgress("Database update complete");
 			Intent intent = new Intent(MediaScanner.this, LocalTagCloud.class);
+			//Intent intent = new Intent(MediaScanner.this, TopLocalTags.class);
 			startActivity(intent);
 			finish();
 		}
