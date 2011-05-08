@@ -127,7 +127,6 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 	private boolean lostDataConnection = false;
 	private static final int NOTIFY_ID = 1337;
 	private FadeVolumeTask mFadeVolumeTask = null;
-	private List<String> recentTracks = new ArrayList<String>(25);
 
 	public static final String META_CHANGED = "fm.last.android.metachanged";
 	public static final String PLAYBACK_FINISHED = "fm.last.android.playbackcomplete";
@@ -808,73 +807,12 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		try {
 			if(currentStationURL.startsWith("boffin-tag://")) {
 				String[] tags = currentStationURL.substring(13).split("\\*");
-				String tag = tags[0];
-				List<LocalCollection.FilesWithTagResult> files = LocalCollection.getInstance().filesWithTag(tag);
-				List<LocalCollection.FilesWithTagResult> sortedFiles = new ArrayList<LocalCollection.FilesWithTagResult>(20);
-				List<String> artists = new ArrayList<String>();
-				logger.info("Got " + files.size() + " tracks");
-				
-				for(int x = 0; x < 20; x++) {
-					float totalWeight;
-					double p = Math.random();
-
-					totalWeight = 0;
-					Iterator<LocalCollection.FilesWithTagResult> i = files.iterator();
-					while(i.hasNext()) {
-						LocalCollection.FilesWithTagResult r = i.next();
-						totalWeight += r.weight;
-					}
-					
-					i = files.iterator();
-					while(i.hasNext() && p > 0) {
-						LocalCollection.FilesWithTagResult r = i.next();
-						float pushDown = 1.0f;
-						if(recentTracks.contains(r.meta.m_album+r.meta.m_artist+r.meta.m_title))
-							pushDown *= 0.001f;
-
-						if(artists.contains(r.meta.m_artist))
-							pushDown *= 0.001f;
-						
-						boolean match = true;
-						for(int t = 1; t < tags.length; t++) {
-							if(!LocalCollection.getInstance().fileHasTag(r.file.id(), tags[t])) {
-								match = false;
-								break;
-							}
-						}
-						
-						if(match && (p < ((r.weight * pushDown) / totalWeight) && r.weight > 1)) {
-							sortedFiles.add(r);
-							artists.add(r.meta.m_artist);
-							if(artists.size() >= 5)
-								artists.remove(0);
-							recentTracks.add(r.meta.m_album+r.meta.m_artist+r.meta.m_title);
-							if(recentTracks.size() >= 25)
-								recentTracks.remove(0);
-							files.remove(r);
-							break;
-						} else {
-							p -= (r.weight / totalWeight);
-						}
-					}
-					if(p <= 0) {
-						logger.info("No more tracks match this tag combo!");
-						break;
-					}
-				}
-				//Collections.sort(sortedFiles, new SortByWeight());
-				//if(tags.length > 1) { //Filter out non-matching tracks
-				//}
-				Iterator<LocalCollection.FilesWithTagResult> i = sortedFiles.iterator();
+				List<LocalCollection.FilesWithTagResult> files = LocalCollection.getInstance().getFilesWithTags(tags);
+				Iterator<LocalCollection.FilesWithTagResult> i = files.iterator();
 				while(i.hasNext()) {
 					LocalCollection.FilesWithTagResult r = i.next();
 					logger.info("Boffin track (weight = " + r.weight + "): " + r.meta.m_artist + " - " + r.meta.m_title);
 					currentQueue.add(r.toRadioTrack());
-				}
-				if(currentQueue.size() < 1 && recentTracks.size() > 1) {
-					logger.info("Retrying");
-					recentTracks.clear();
-					refreshPlaylist();
 				}
 			} else {
 				String bitrate;

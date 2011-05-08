@@ -469,6 +469,68 @@ public class LocalCollection extends SQLiteOpenHelper
 		}
 	}
 
+	private List<String> recentTracks = new ArrayList<String>(25);
+
+	public List<FilesWithTagResult> getFilesWithTags(String[] tags) {
+		String tag = tags[0];
+		List<LocalCollection.FilesWithTagResult> files = LocalCollection.getInstance().filesWithTag(tag);
+		List<LocalCollection.FilesWithTagResult> result = new ArrayList<LocalCollection.FilesWithTagResult>(20);
+		List<String> artists = new ArrayList<String>();
+		
+		for(int x = 0; x < 20; x++) {
+			float totalWeight;
+			double p = Math.random();
+
+			totalWeight = 0;
+			Iterator<LocalCollection.FilesWithTagResult> i = files.iterator();
+			while(i.hasNext()) {
+				LocalCollection.FilesWithTagResult r = i.next();
+				totalWeight += r.weight;
+			}
+			
+			i = files.iterator();
+			while(i.hasNext() && p > 0) {
+				LocalCollection.FilesWithTagResult r = i.next();
+				float pushDown = 1.0f;
+				if(recentTracks.contains(r.meta.m_album+r.meta.m_artist+r.meta.m_title))
+					pushDown *= 0.001f;
+
+				if(artists.contains(r.meta.m_artist))
+					pushDown *= 0.001f;
+				
+				boolean match = true;
+				for(int t = 1; t < tags.length; t++) {
+					if(!LocalCollection.getInstance().fileHasTag(r.file.id(), tags[t])) {
+						match = false;
+						break;
+					}
+				}
+				
+				if(match && (p < ((r.weight * pushDown) / totalWeight) && r.weight > 1)) {
+					result.add(r);
+					artists.add(r.meta.m_artist);
+					if(artists.size() >= 5)
+						artists.remove(0);
+					recentTracks.add(r.meta.m_album+r.meta.m_artist+r.meta.m_title);
+					if(recentTracks.size() >= 25)
+						recentTracks.remove(0);
+					files.remove(r);
+					break;
+				} else {
+					p -= (r.weight / totalWeight);
+				}
+			}
+			if(p <= 0) {
+				break;
+			}
+		}
+		if(result.size() < 1 && recentTracks.size() > 1) {
+			recentTracks.clear();
+			return getFilesWithTags(tags);
+		}
+		return result;
+	}
+	
 	public interface LocalCollectionProgressCallback {
 		public void localCollectionProgress(int current, int total);
 		public void artistAdded(String artist);
