@@ -58,8 +58,8 @@ public class LocalTagCloud extends Activity implements OnClickListener, TextWatc
 		
         List<TopTagsResult> topTags = LocalCollection.getInstance().getTopTags(80);
         List<String> tagsList = new ArrayList<String>(topTags.size());
-        Iterator<TopTagsResult> i = topTags.iterator();
         mTagCloud.clear();
+        Iterator<TopTagsResult> i = topTags.iterator();
         while(i.hasNext()) {
         	TopTagsResult r = i.next();
         	//tagsList.add(r.tag);

@@ -21,6 +21,8 @@
 package fm.last.android.widget;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -36,7 +38,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Animation.AnimationListener;
 import android.widget.TextView;
-import fm.last.android.LastFMApplication;
 import fm.last.android.R;
 import fm.last.android.db.LocalCollection.TopTagsResult;
 
@@ -53,7 +54,8 @@ public class TagCloud extends ViewGroup {
 
 	TreeMap<Float, TextView> mTagButtons;
 	TextView mAreaHint;
-
+	List<String> mSelectedTags = new ArrayList<String>();
+	
 	/**
 	 * Padding between buttons
 	 */
@@ -89,13 +91,17 @@ public class TagCloud extends ViewGroup {
 		init(context);
 	}
 
+	public List<String> getSelectedTags() {
+		return mSelectedTags;
+	}
+	
 	/**
 	 * Sharable code between constructors
 	 * 
 	 * @param context
 	 */
 	private void init(Context context) {
-		mTagButtons = new TreeMap<Float, TextView>();
+		mTagButtons = new TreeMap<Float, TextView>(Collections.reverseOrder());
 		mPadding = 10; // TODO get from xml layout
 		mAnimationEnabled = false;
 		mAnimating = false;
@@ -125,7 +131,6 @@ public class TagCloud extends ViewGroup {
 				max = weight;
 			}
 		}
-		
 		float minFontSize = 10.0f;
 		float maxFontSize = 100.0f;
 		float multiplier = (maxFontSize-minFontSize)/(max-min);
@@ -133,7 +138,7 @@ public class TagCloud extends ViewGroup {
 			float weight = entry.getKey();
 			TextView tv = entry.getValue();
 			float fontSize = minFontSize + (float)Math.log(0.01+(max-(max-(weight-min)))*multiplier);  
-			tv.setTextSize( fontSize * 1.5f );
+			tv.setTextSize( fontSize * 2.0f );
 			Log.d(TAG, "Sizing: " + tv.getText() + "Weight: " + weight + " Size:" + tv.getTextSize());
 		}
 	}
@@ -153,7 +158,15 @@ public class TagCloud extends ViewGroup {
 		tagButton.setOnClickListener(new OnClickListener() {
 
 			public void onClick(View v) {
-				LastFMApplication.getInstance().playRadioStation(TagCloud.this.getContext(), "boffin-tag://" + r.tag, true);
+				TextView tv = (TextView)v;
+
+				if(mSelectedTags.contains(r.tag)) {
+					mSelectedTags.remove(r.tag);
+					tv.setBackgroundColor(Color.TRANSPARENT);
+				} else {
+					mSelectedTags.add(r.tag);
+					tv.setBackgroundColor(Color.LTGRAY);
+				}
 			}
 
 		});
@@ -228,7 +241,7 @@ public class TagCloud extends ViewGroup {
 		int y = mPadding;
 		int maxHeight = 0;
 
-		for (Map.Entry<Float, TextView> entry : mTagButtons.descendingMap().entrySet()) {
+		for (Map.Entry<Float, TextView> entry : mTagButtons.entrySet()) {
 			TextView child = entry.getValue();
 
 			int cw = child.getMeasuredWidth();
