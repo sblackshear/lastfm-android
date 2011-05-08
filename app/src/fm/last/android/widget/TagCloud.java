@@ -154,6 +154,8 @@ public class TagCloud extends ViewGroup {
 		tagButton.setTextColor(Color.BLACK);
 		tagButton.setTextSize(r.weight);
 		tagButton.setText(r.tag);
+		tagButton.setBackgroundColor(Color.LTGRAY);
+		tagButton.setPadding(6, 2, 6, 2);
 
 		tagButton.setOnClickListener(new OnClickListener() {
 
@@ -162,10 +164,12 @@ public class TagCloud extends ViewGroup {
 
 				if(mSelectedTags.contains(r.tag)) {
 					mSelectedTags.remove(r.tag);
-					tv.setBackgroundColor(Color.TRANSPARENT);
+					tagButton.setTextColor(Color.BLACK);
+					tv.setBackgroundColor(Color.LTGRAY);
 				} else {
 					mSelectedTags.add(r.tag);
-					tv.setBackgroundColor(Color.LTGRAY);
+					tagButton.setTextColor(Color.WHITE);
+					tv.setBackgroundColor(Color.GRAY);
 				}
 			}
 
