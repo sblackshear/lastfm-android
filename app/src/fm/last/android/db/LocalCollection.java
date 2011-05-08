@@ -405,6 +405,32 @@ public class LocalCollection extends SQLiteOpenHelper
 		}
 	}
 	
+	//Returns true if this file has the specified tag
+	public boolean fileHasTag(long file, String tag) {
+        String query = "SELECT file FROM tracktags " +
+        	"INNER JOIN tags on tags.id = tracktags.tag " +
+        	"WHERE tags.name = ? AND tracktags.file = ? ORDER BY weight ASC";
+
+		SQLiteDatabase db = null;
+		Cursor c = null;
+		try {
+			db = getReadableDatabase();
+			c = db.rawQuery(query, new String[] { tag, String.valueOf(file) });
+			boolean result = false;
+			if (c.getCount() > 0) {
+				result = true;
+			}
+			c.close();
+			db.close();
+			return result;
+		} finally {
+			if(c != null)
+				c.close();
+			if(db != null)
+				db.close();
+		}
+	}
+	
 	// returns a list (of up to 'limit') of the weightiest tags
 	public List<TopTagsResult>getTopTags(int limit) {
 	    String query = "SELECT name, sum(weight) AS weight FROM tracktags " +

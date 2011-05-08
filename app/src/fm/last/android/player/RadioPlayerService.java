@@ -317,7 +317,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 					try {
 						String tag = stationURL.substring(13);
 						logger.info("Boffin radio tag: " + tag);
-						currentStation = new Station(tag + "  Local Tag Radio", stationURL, "boffin-tag", "0");
+						currentStation = new Station(tag + " Tag Radio", stationURL, "boffin-tag", "0");
 						currentStationURL = stationURL;
 						mState = STATE_TUNING;
 						currentQueue.clear();
@@ -807,7 +807,8 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		RadioPlayList playlist;
 		try {
 			if(currentStationURL.startsWith("boffin-tag://")) {
-				String tag = currentStationURL.substring(13);
+				String[] tags = currentStationURL.substring(13).split("\\*");
+				String tag = tags[0];
 				List<LocalCollection.FilesWithTagResult> files = LocalCollection.getInstance().filesWithTag(tag);
 				List<LocalCollection.FilesWithTagResult> sortedFiles = new ArrayList<LocalCollection.FilesWithTagResult>(20);
 				List<String> artists = new ArrayList<String>();
@@ -825,7 +826,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 					}
 					
 					i = files.iterator();
-					while(i.hasNext()) {
+					while(i.hasNext() && p > 0) {
 						LocalCollection.FilesWithTagResult r = i.next();
 						float pushDown = 1.0f;
 						if(recentTracks.contains(r.meta.m_album+r.meta.m_artist+r.meta.m_title))
@@ -833,7 +834,16 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 
 						if(artists.contains(r.meta.m_artist))
 							pushDown *= 0.001f;
-						if(p < ((r.weight * pushDown) / totalWeight) && r.weight > 1) {
+						
+						boolean match = true;
+						for(int t = 1; t < tags.length; t++) {
+							if(!LocalCollection.getInstance().fileHasTag(r.file.id(), tags[t])) {
+								match = false;
+								break;
+							}
+						}
+						
+						if(match && (p < ((r.weight * pushDown) / totalWeight) && r.weight > 1)) {
 							sortedFiles.add(r);
 							artists.add(r.meta.m_artist);
 							if(artists.size() >= 5)
@@ -847,8 +857,14 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 							p -= (r.weight / totalWeight);
 						}
 					}
+					if(p <= 0) {
+						logger.info("No more tracks match this tag combo!");
+						break;
+					}
 				}
 				//Collections.sort(sortedFiles, new SortByWeight());
+				//if(tags.length > 1) { //Filter out non-matching tracks
+				//}
 				Iterator<LocalCollection.FilesWithTagResult> i = sortedFiles.iterator();
 				while(i.hasNext()) {
 					LocalCollection.FilesWithTagResult r = i.next();
@@ -856,6 +872,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 					currentQueue.add(r.toRadioTrack());
 				}
 				if(currentQueue.size() < 1 && recentTracks.size() > 1) {
+					logger.info("Retrying");
 					recentTracks.clear();
 					refreshPlaylist();
 				}
