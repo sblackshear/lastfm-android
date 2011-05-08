@@ -323,6 +323,11 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 						nextSong();
 						if(!currentQueue.isEmpty())
 							notifyChange(STATION_CHANGED);
+						else {
+							Intent i = new Intent("fm.last.android.ERROR");
+							i.putExtra("error", (Parcelable) new WSError("radio.tune", "not enough content", WSError.ERROR_NotEnoughContent));
+							sendBroadcast(i);
+						}
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

@@ -10,11 +10,15 @@ import fm.last.android.LastFMApplication;
 import fm.last.android.R;
 import fm.last.android.db.LocalCollection;
 import fm.last.android.db.LocalCollection.TopTagsResult;
+import fm.last.android.player.RadioPlayerService;
 import fm.last.android.utils.AsyncTaskEx;
 import fm.last.android.widget.TagCloud;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
@@ -69,9 +73,19 @@ public class LocalTagCloud extends Activity implements OnClickListener {
 	public void onResume() {
 		super.onResume();
 		mProgress.setVisibility(View.GONE);
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(RadioPlayerService.STATION_CHANGED);
+		intentFilter.addAction("fm.last.android.ERROR");
+		registerReceiver(statusListener, intentFilter);
 	}
 	
-	private void createPlaylistForTags(String[] tags) {
+	@Override
+	public void onPause() {
+		super.onPause();
+		unregisterReceiver(statusListener);
+	}
+	
+	private boolean createPlaylistForTags(String[] tags) {
 		List<LocalCollection.FilesWithTagResult> files = LocalCollection.getInstance().getFilesWithTags(tags, 100);
 		Log.i("Last.fm", "Got " + files.size() + " tracks");
 		if(files.size() > 0) {
@@ -101,12 +115,23 @@ public class LocalTagCloud extends Activity implements OnClickListener {
 				}
 				f.close();
 				sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+				return true;
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
+		return false;
 	}
+	
+	BroadcastReceiver statusListener = new BroadcastReceiver() {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			mProgress.setVisibility(View.GONE);
+		}
+	};
+
 	
 	public void onClick(View v) {
 		List<String> tags = mTagCloud.getSelectedTags();
@@ -122,13 +147,14 @@ public class LocalTagCloud extends Activity implements OnClickListener {
 				if(i.hasNext())
 					url += "*";
 			}
+
 			LastFMApplication.getInstance().playRadioStation(this, url, true);
 		} else if(v.getId() == R.id.export) {
 			new PlaylistExportTask(tags.toArray(new String[tags.size()])).execute((Void)null);
 		}
 	}
 	
-	private class PlaylistExportTask extends AsyncTaskEx<Void, Void, Void> {
+	private class PlaylistExportTask extends AsyncTaskEx<Void, Void, Boolean> {
 		String[] tags;
 		
 		public PlaylistExportTask(String[] t) {
@@ -140,14 +166,18 @@ public class LocalTagCloud extends Activity implements OnClickListener {
 		}
 		
 		@Override
-		public Void doInBackground(Void... params) {
-			createPlaylistForTags(tags);
-			return null;
+		public Boolean doInBackground(Void... params) {
+			return createPlaylistForTags(tags);
 		}
 
 		@Override
-		public void onPostExecute(Void result) {
+		public void onPostExecute(Boolean result) {
 			mProgress.setVisibility(View.GONE);
+			if(result) {
+				LastFMApplication.getInstance().presentError(LocalTagCloud.this, "Export Complete", "Your playlist has been successfully exported and should be available in your Music app.");
+			} else {
+				LastFMApplication.getInstance().presentError(LocalTagCloud.this, "Export Failed", "Unable to export your playlist.  Please try another combination of tags.");
+			}
 		}
 	}
 
