@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	android:layout_width="fill_parent" android:layout_height="fill_parent"
+	xmlns:android="http://schemas.android.com/apk/res/android">
+	<LinearLayout android:id="@+id/SearchBar" 
+		android:background="@drawable/tab_bar_rest"
+		android:layout_width="fill_parent"
+		android:layout_below="@+id/TabBar"
+		android:layout_height="wrap_content" android:paddingTop="4dip" android:animationCache="true">
+		<Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/play" android:text="Listen to Tags"></Button>
+		<Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Export Playlist" android:id="@+id/export"></Button>
+		<ProgressBar android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="40dip" android:id="@+id/progress" android:indeterminate="true" android:indeterminateBehavior="cycle"></ProgressBar>
+ 	</LinearLayout>
+	
+	<LinearLayout android:layout_below="@id/SearchBar" android:layout_height="fill_parent" android:layout_width="fill_parent" android:orientation="vertical" android:background="#ebebeb" android:id="@+id/layout">
+	</LinearLayout>
+</RelativeLayout>
