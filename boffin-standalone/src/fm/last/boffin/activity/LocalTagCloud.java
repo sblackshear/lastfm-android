@@ -2,6 +2,7 @@ package fm.last.boffin.activity;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -13,8 +14,12 @@ import fm.last.boffin.db.LocalCollection.TopTagsResult;
 import fm.last.boffin.player.RadioPlayerService;
 import fm.last.boffin.utils.AsyncTaskEx;
 import fm.last.boffin.widget.TagCloud;
+import fm.last.util.UrlUtil;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -62,7 +67,7 @@ public class LocalTagCloud extends Activity implements OnClickListener {
 		mProgress = (ProgressBar)findViewById(R.id.progress);
 
         tags = tagsList.toArray(new String[tagsList.size()]);
-        //setTags(tags);
+		new CheckUpdatesTask().execute((Void)null);
     }
 	
 	@Override
@@ -173,6 +178,38 @@ public class LocalTagCloud extends Activity implements OnClickListener {
 				LastFMApplication.getInstance().presentError(LocalTagCloud.this, "Export Complete", "Your playlist has been successfully exported and should be available in your Music app.");
 			} else {
 				LastFMApplication.getInstance().presentError(LocalTagCloud.this, "Export Failed", "Unable to export your playlist.  Please try another combination of tags.");
+			}
+		}
+	}
+	private class CheckUpdatesTask extends AsyncTaskEx<Void, Void, Boolean> {
+		private String mUpdateURL = "";
+
+		@Override
+		public Boolean doInBackground(Void... params) {
+			boolean success = false;
+
+			try {
+				URL url = new URL("http://cdn.last.fm/client/android/boffin-" + getPackageManager().getPackageInfo("fm.last.boffin", 0).versionName + ".txt");
+				mUpdateURL = UrlUtil.doGet(url);
+				if (mUpdateURL.startsWith("market://") || mUpdateURL.startsWith("http://")) {
+					success = true;
+					Log.i("Last.fm", "Update URL: " + mUpdateURL);
+				}
+			} catch (Exception e) {
+				// No updates available! Yay!
+			}
+			return success;
+		}
+
+		@Override
+		public void onPostExecute(Boolean result) {
+			if (result) {
+				NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+				Notification notification = new Notification(R.drawable.as_statusbar, "A new version of Boffin is available", System.currentTimeMillis());
+				PendingIntent contentIntent = PendingIntent.getActivity(LocalTagCloud.this, 0, new Intent(Intent.ACTION_VIEW, Uri.parse(mUpdateURL)), 0);
+				notification.setLatestEventInfo(LocalTagCloud.this, getString(R.string.newversion_info_title), getString(R.string.newversion_info_text), contentIntent);
+
+				nm.notify(12345, notification);
 			}
 		}
 	}

@@ -31,22 +31,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcelable;
-import android.os.RemoteException;
 import android.util.Log;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
-import fm.last.boffin.player.IRadioPlayer;
 import fm.last.api.Session;
 import fm.last.api.WSError;
 import fm.last.boffin.activity.Player;
-import fm.last.boffin.db.LastFmDbHelper;
 import fm.last.boffin.player.RadioPlayerService;
 import fm.last.util.UrlUtil;
 
@@ -57,8 +52,6 @@ public class LastFMApplication extends Application {
 	public Context mCtx;
 	public GoogleAnalyticsTracker tracker;
 
-	private String mRequestedURL;
-	
 	private static LastFMApplication instance = null;
 
 	public static LastFMApplication getInstance() {
@@ -127,7 +120,6 @@ public class LastFMApplication extends Application {
 
 	public void playRadioStation(Context ctx, String url, boolean showPlayer) {
 		mCtx = ctx;
-		mRequestedURL = url;
 				
 		final Intent out = new Intent(this, RadioPlayerService.class);
 		out.setAction("fm.last.boffin.PLAY");
