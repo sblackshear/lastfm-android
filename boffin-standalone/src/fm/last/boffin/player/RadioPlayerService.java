@@ -126,12 +126,12 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 	private static final int NOTIFY_ID = 1337;
 	private FadeVolumeTask mFadeVolumeTask = null;
 
-	public static final String META_CHANGED = "fm.last.boffin.metachanged";
-	public static final String PLAYBACK_FINISHED = "fm.last.boffin.playbackcomplete";
-	public static final String PLAYBACK_STATE_CHANGED = "fm.last.boffin.playstatechanged";
-	public static final String STATION_CHANGED = "fm.last.boffin.stationchanged";
-	public static final String PLAYBACK_ERROR = "fm.last.boffin.playbackerror";
-	public static final String UNKNOWN = "fm.last.boffin.unknown";
+	public static final String META_CHANGED = "fm.last.android.metachanged";
+	public static final String PLAYBACK_FINISHED = "fm.last.android.playbackcomplete";
+	public static final String PLAYBACK_STATE_CHANGED = "fm.last.android.playstatechanged";
+	public static final String STATION_CHANGED = "fm.last.android.stationchanged";
+	public static final String PLAYBACK_ERROR = "fm.last.android.playbackerror";
+	public static final String UNKNOWN = "fm.last.android.unknown";
 
 	/**
 	 * Used for pausing on incoming call
