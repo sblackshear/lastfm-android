@@ -2,6 +2,8 @@ app/bin
 app/gen
 app/src/fm/last/android/PrivateAPIKey.java
 app/assets
+boffin-standalone/bin
+boffin-standalone/gen
 LastFmAuthTest/bin
 LastFmAuthTest/gen
 library/bin
