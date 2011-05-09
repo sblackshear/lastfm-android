@@ -41,12 +41,10 @@ public class LocalTagCloud extends Activity implements OnClickListener {
 	@Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-		mTagCloud = new TagCloud(this);
 		setTitle("Boffin: Top Tags");
 		setContentView(R.layout.local_tag_cloud);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT); 
-		LinearLayout layout = (LinearLayout)findViewById(R.id.layout);
-		layout.addView(mTagCloud, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+		mTagCloud = (TagCloud) findViewById(R.id.cloud);
 		
         List<TopTagsResult> topTags = LocalCollection.getInstance().getTopTags(80);
         List<String> tagsList = new ArrayList<String>(topTags.size());

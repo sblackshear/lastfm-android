@@ -212,6 +212,9 @@ public class TagCloud extends ViewGroup {
 
 		int selfw = getMeasuredWidth();
 		int selfh = getMeasuredHeight();
+		int x = mPadding;
+		int y = mPadding;
+		int maxHeight = 0;
 
 		int count = getChildCount();
 
@@ -222,13 +225,30 @@ public class TagCloud extends ViewGroup {
 			mAreaHint.setVisibility(View.GONE);
 		}
 
-		for (int i = 0; i < count; i++) {
-			View child = getChildAt(i);
+		for (Map.Entry<Float, TextView> entry : mTagButtons.entrySet()) {
+			TextView child = entry.getValue();
+
 			if (child.getVisibility() != GONE) {
 				// LayoutParams lp = (LayoutParams) child.getLayoutParams();
 				child.measure(MeasureSpec.makeMeasureSpec(selfw, MeasureSpec.AT_MOST), MeasureSpec.makeMeasureSpec(selfh, MeasureSpec.AT_MOST));
 			}
+
+			int cw = child.getMeasuredWidth();
+			int ch = child.getMeasuredHeight();
+			
+			if( ch > maxHeight ) maxHeight = ch;
+			
+			// tag doesn't fit the row, move it to next one
+			if (x + cw > selfw) {
+				x = mPadding;
+				y = y + maxHeight + mPadding;
+				maxHeight = 0;
+			}
+
+			x = x + cw + mPadding;
 		}
+		
+		setMeasuredDimension(selfw, y + maxHeight);
 	}
 
 	@Override
