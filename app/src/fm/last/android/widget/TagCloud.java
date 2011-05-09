@@ -211,7 +211,6 @@ public class TagCloud extends ViewGroup {
 		Log.i(TAG, "onMeasue()");
 
 		int selfw = getMeasuredWidth();
-		int selfh = getMeasuredHeight();
 		int x = mPadding;
 		int y = mPadding;
 		int maxHeight = 0;
@@ -230,7 +229,7 @@ public class TagCloud extends ViewGroup {
 
 			if (child.getVisibility() != GONE) {
 				// LayoutParams lp = (LayoutParams) child.getLayoutParams();
-				child.measure(MeasureSpec.makeMeasureSpec(selfw, MeasureSpec.AT_MOST), MeasureSpec.makeMeasureSpec(selfh, MeasureSpec.AT_MOST));
+				child.measure(MeasureSpec.makeMeasureSpec(selfw, MeasureSpec.AT_MOST), MeasureSpec.makeMeasureSpec(100, MeasureSpec.AT_MOST));
 			}
 
 			int cw = child.getMeasuredWidth();
