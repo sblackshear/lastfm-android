@@ -45,6 +45,7 @@ import fm.last.android.db.LocalCollection.LocalCollectionProgressCallback;
 import fm.last.android.utils.AsyncTaskEx;
 import fm.last.android.widget.AlbumArt;
 import fm.last.api.Artist;
+import fm.last.api.WSError;
 import fm.last.util.UrlUtil;
 
 public class MediaScanner extends Activity implements LocalCollectionProgressCallback {
@@ -183,6 +184,8 @@ public class MediaScanner extends Activity implements LocalCollectionProgressCal
 			try {
 				Artist a = AndroidLastFmServerFactory.getServer().getArtistInfo(artist, "", "", "");
 				return a.getURLforImageSize("medium");
+			} catch (WSError e) {
+				e.printStackTrace();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

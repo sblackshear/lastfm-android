@@ -38,6 +38,7 @@ import android.view.Window;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import fm.last.api.Artist;
+import fm.last.api.WSError;
 import fm.last.boffin.AndroidLastFmServerFactory;
 import fm.last.boffin.R;
 import fm.last.boffin.db.LocalCollection;
@@ -183,6 +184,8 @@ public class MediaScanner extends Activity implements LocalCollectionProgressCal
 			try {
 				Artist a = AndroidLastFmServerFactory.getServer().getArtistInfo(artist, "", "", "");
 				return a.getURLforImageSize("medium");
+			} catch (WSError e) {
+				e.printStackTrace();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
