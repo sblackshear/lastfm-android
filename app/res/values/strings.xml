@@ -282,4 +282,6 @@
 	<string name="sync_only_one_account">Only one Last.fm account is supported.</string>
 	<string name="sync_prompt_title">Sync Last.fm Contacts</string>
 	<string name="sync_prompt_body">Would you like to sync your Last.fm friends with your Android contacts?  This gives you quick access to your friends\' Last.fm status and profile information.  You can enable or disable this option at any time through the \'Accounts &amp; Sync\' settings page.</string>
+	<string name="cal_sync_prompt_title">Sync Last.fm Events</string>
+	<string name="cal_sync_prompt_body">Would you like to sync your Last.fm events with your Android calendar?  You can enable or disable this option at any time through the \'Accounts &amp; Sync\' settings page.</string>
 </resources>

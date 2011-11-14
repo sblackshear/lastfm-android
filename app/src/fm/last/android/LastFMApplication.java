@@ -387,6 +387,8 @@ public class LastFMApplication extends Application {
 		editor.remove("scrobbler_session");
 		editor.remove("scrobbler_subsurl");
 		editor.remove("scrobbler_npurl");
+		editor.remove("sync_nag");
+		editor.remove("sync_nag_cal");
 		editor.commit();
 		session = null;
 		try {

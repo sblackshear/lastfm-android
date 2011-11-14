@@ -90,17 +90,6 @@ public class Profile extends ActivityGroup {
 			return;
 		}
 		
-		if(Integer.decode(Build.VERSION.SDK) >= 6 && !isHTCContactsInstalled(this)) {
-			SharedPreferences settings = getSharedPreferences(LastFm.PREFS, 0);
-			if(!settings.getBoolean("sync_nag", false)) {
-				SharedPreferences.Editor editor = settings.edit();
-				editor.putBoolean("sync_nag", true);
-				editor.commit();
-				Intent intent = new Intent(Profile.this, SyncPrompt.class);
-				startActivity(intent);
-			}
-		}
-		
 		Intent intent = getIntent();
 		if (intent.getData() != null) {
 			if(intent.getData().getScheme() != null && intent.getData().getScheme().equals("lastfm")) {
@@ -212,6 +201,7 @@ public class Profile extends ActivityGroup {
 
 	@Override
 	public void onResume() {
+		super.onResume();
 		mIsPlaying = false;
 		
 		LastFMApplication.getInstance().bindService(new Intent(LastFMApplication.getInstance(), fm.last.android.player.RadioPlayerService.class),
@@ -244,7 +234,24 @@ public class Profile extends ActivityGroup {
 		} catch (Exception e) {
 			//Google Analytics doesn't appear to be thread safe
 		}
-		super.onResume();
+		
+		if(Integer.decode(Build.VERSION.SDK) >= 6) {
+			SharedPreferences settings = getSharedPreferences(LastFm.PREFS, 0);
+			if(!settings.getBoolean("sync_nag", false) && !isHTCContactsInstalled(this)) {
+				SharedPreferences.Editor editor = settings.edit();
+				editor.putBoolean("sync_nag", true);
+				editor.commit();
+				Intent intent = new Intent(Profile.this, ContactsSyncPrompt.class);
+				startActivity(intent);
+			} else if(Integer.decode(Build.VERSION.SDK) >= 14 && !settings.getBoolean("sync_nag_cal", false)) {
+				SharedPreferences.Editor editor = settings.edit();
+				editor.putBoolean("sync_nag_cal", true);
+				editor.commit();
+				Intent intent = new Intent(Profile.this, CalendarSyncPrompt.class);
+				startActivity(intent);
+			}
+		}
+
 	}
 
 	@Override
