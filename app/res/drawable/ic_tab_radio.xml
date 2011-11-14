@@ -4,5 +4,5 @@
     <item android:drawable="@drawable/radio_dark"
           android:state_selected="true" />
     <!-- When not selected, use white-->
-    <item android:drawable="@drawable/radio" />
+    <item android:drawable="@drawable/radio_light" />
 </selector>
