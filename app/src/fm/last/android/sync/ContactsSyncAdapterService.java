@@ -42,7 +42,6 @@ import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.ContactsContract.RawContacts.Entity;
-import android.util.Log;
 
 /**
  * @author sam
@@ -54,7 +53,6 @@ public class ContactsSyncAdapterService extends Service {
 	private static String UsernameColumn = ContactsContract.RawContacts.SYNC1;
 	private static String PhotoUrlColumn = ContactsContract.RawContacts.SYNC2;
 	private static String PhotoTimestampColumn = ContactsContract.RawContacts.SYNC3;
-	private static String TasteTimestampColumn = ContactsContract.RawContacts.SYNC4;
 	private static Integer syncSchema = 2;
 
 	public ContactsSyncAdapterService() {
@@ -289,7 +287,7 @@ public class ContactsSyncAdapterService extends Service {
 		// Load the local Last.fm contacts
 		Uri rawContactUri = RawContacts.CONTENT_URI.buildUpon().appendQueryParameter(RawContacts.ACCOUNT_NAME, account.name).appendQueryParameter(
 				RawContacts.ACCOUNT_TYPE, account.type).build();
-		Cursor c1 = mContentResolver.query(rawContactUri, new String[] { BaseColumns._ID, UsernameColumn, PhotoUrlColumn, PhotoTimestampColumn, TasteTimestampColumn }, null, null, null);
+		Cursor c1 = mContentResolver.query(rawContactUri, new String[] { BaseColumns._ID, UsernameColumn, PhotoUrlColumn, PhotoTimestampColumn }, null, null, null);
 		while (c1 != null && c1.moveToNext()) {
 			if(is_full_sync) {
 				deleteContact(context, c1.getLong(0));

@@ -62,6 +62,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.DeadObjectException;
 import android.os.IBinder;
 import android.os.Looper;
@@ -128,6 +129,8 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 	private FadeVolumeTask mFadeVolumeTask = null;
     RemoteControlClientCompat mRemoteControlClientCompat;
     private Bitmap mArtwork;
+    
+    private StreamProxy proxy;
 
 	public static final String META_CHANGED = "fm.last.android.metachanged";
 	public static final String PLAYBACK_FINISHED = "fm.last.android.playbackcomplete";
@@ -189,7 +192,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Last.fm Player");
 
 		WifiManager wm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-		wifiLock = wm.createWifiLock("Last.fm Player");
+		wifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL, "Last.fm Player");
 
 		mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 		
@@ -635,15 +638,25 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 				logger.severe("playTrack() called from wrong state!");
 				return;
 			}
-			logger.info("Streaming: " + track.getLocationUrl());
+			String url = track.getLocationUrl();
+			//Stream through a proxy on Honeycomb to enforce one connection per track
+			if(Integer.decode(Build.VERSION.SDK) > 10 && Integer.decode(Build.VERSION.SDK) < 14) {
+				if (proxy == null) {
+					proxy = new StreamProxy();
+					proxy.init();
+					proxy.start();
+				}
+				url = String.format("http://127.0.0.1:%d/%s",proxy.getPort(), url);
+			}
+			logger.info("Streaming: " + url);
 			p.reset();
-			p.setWakeMode(this, PowerManager.PARTIAL_WAKE_LOCK);
+			p.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
 			p.setOnCompletionListener(mOnCompletionListener);
 			p.setOnBufferingUpdateListener(mOnBufferingUpdateListener);
 			p.setOnPreparedListener(mOnPreparedListener);
 			p.setOnErrorListener(mOnErrorListener);
 			p.setAudioStreamType(AudioManager.STREAM_MUSIC);
-			p.setDataSource(track.getLocationUrl());
+			p.setDataSource(url);
 			
 			new LoadAlbumArtTask().execute((Void)null);
 			
@@ -834,6 +847,8 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 			ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 			NetworkInfo ni = cm.getActiveNetworkInfo();
 			mDoHasWiFi = (ni == null || ni.getType() == ConnectivityManager.TYPE_WIFI);
+			wifiLock.acquire();
+			wakeLock.acquire();
 			playingNotify();
 			notifyChange(ScrobblerService.META_CHANGED);
 			try {
