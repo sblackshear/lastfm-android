@@ -42,6 +42,7 @@ import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.ContactsContract.RawContacts.Entity;
+import android.util.Log;
 
 /**
  * @author sam
@@ -178,7 +179,7 @@ public class ContactsSyncAdapterService extends Service {
 					builder.withValue(ContactsContract.StatusUpdates.STATUS_RES_PACKAGE, "fm.last.android");
 					builder.withValue(ContactsContract.StatusUpdates.STATUS_LABEL, R.string.app_name);
 					builder.withValue(ContactsContract.StatusUpdates.STATUS_ICON, R.drawable.icon);
-					if (track.getDate() != null) {
+					if (track.getDate() != null && Long.parseLong(track.getDate()) > 0) {
 						long date = Long.parseLong(track.getDate()) * 1000;
 						builder.withValue(ContactsContract.StatusUpdates.STATUS_TIMESTAMP, date);
 					}
@@ -351,14 +352,33 @@ public class ContactsSyncAdapterService extends Service {
 					if(entry.photo_url != url)
 						updateContactPhoto(operationList, entry.raw_id, url);
 				}
+			}
+
+			if(operationList.size() > 0) {
+				try {
+					mContentResolver.applyBatch(ContactsContract.AUTHORITY, operationList);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				operationList.clear();
+			}
+		}
+		
+		for (User user : friends) {
+			String username = user.getName();
+			
+			if (localContacts.containsKey(username)) {
+				SyncEntry entry = localContacts.get(username);
 				
-				if(user.getRecentTrack() != null) {
+				if(user.getRecentTrack() != null && user.getRecentTrack().getName() != null && user.getRecentTrack().getName().length() > 0) {
+					Log.i("Sync", "User: " + user.getName() + " track: " + user.getRecentTrack().getName());
 					updateContactStatus(operationList, entry.raw_id, user.getRecentTrack());
 				} else {
 					try {
 						Track[] tracks = null;
 						tracks = server.getUserRecentTracks(username, "true", 1);
 						if (tracks.length > 0) {
+							Log.i("Sync", "(fetched) User: " + user.getName() + " track: " + tracks[0].getName());
 							updateContactStatus(operationList, entry.raw_id, tracks[0]);
 						}
 					} catch (Exception e) {
