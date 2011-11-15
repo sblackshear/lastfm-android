@@ -33,10 +33,10 @@ public class User implements Serializable {
 		MALE, FEMALE, UNKNOWN
 	}
 
-	private static final long serialVersionUID = 2047407259337226913L;
+	private static final long serialVersionUID = 2047407259337226914L;
 
 	public User(String name, String realname, String url, ImageUrl[] images, Locale country, String age, Gender gender, String playcount, String subscriber,
-			Date joindate) {
+			Date joindate, Track recentTrack) {
 		this.name = name;
 		this.realname = realname;
 		this.url = url;
@@ -47,6 +47,7 @@ public class User implements Serializable {
 		this.subscriber = subscriber;
 		this.joindate = joindate;
 		this.gender = gender;
+		this.recentTrack = recentTrack;
 	}
 
 	public String getName() {
@@ -88,6 +89,10 @@ public class User implements Serializable {
 	public String getSubscriber() {
 		return subscriber;
 	}
+	
+	public Track getRecentTrack() {
+		return recentTrack;
+	}
 
 	public String getURLforImageSize(String size) {
 		for (ImageUrl image : images) {
@@ -108,4 +113,5 @@ public class User implements Serializable {
 	private final String realname;
 	private final Date joindate;
 	private final String subscriber;
+	private final Track recentTrack;
 }

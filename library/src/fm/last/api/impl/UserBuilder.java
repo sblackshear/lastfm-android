@@ -27,6 +27,7 @@ import java.util.Locale;
 import org.w3c.dom.Node;
 
 import fm.last.api.ImageUrl;
+import fm.last.api.Track;
 import fm.last.api.User;
 import fm.last.api.User.Gender;
 import fm.last.util.XMLUtil;
@@ -37,6 +38,7 @@ import fm.last.xml.XMLBuilder;
  */
 public class UserBuilder extends XMLBuilder<User> {
 	private ImageUrlBuilder imageBuilder = new ImageUrlBuilder();
+	private TrackBuilder trackBuilder = new TrackBuilder();
 
 	@Override
 	public User build(Node userNode) {
@@ -81,6 +83,11 @@ public class UserBuilder extends XMLBuilder<User> {
 			}
 		}
 
-		return new User(name, realname, url, images, countryLocale, age, genderEnum, playcount, subscriber, registeredDate);
+		Track recentTrack = null;
+		Node trackNode = getChildNode("recenttrack");
+		if(trackNode != null)
+			recentTrack = trackBuilder.build(trackNode);
+		
+		return new User(name, realname, url, images, countryLocale, age, genderEnum, playcount, subscriber, registeredDate, recentTrack);
 	}
 }
