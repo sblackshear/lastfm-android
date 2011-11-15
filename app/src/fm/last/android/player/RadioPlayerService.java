@@ -336,6 +336,10 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		} catch (Exception e) {
 			
 		}
+        if(proxy != null && proxy.isRunning()) {
+        	proxy.stop();
+        	proxy = null;
+        }
 		clearNotification();
 		unregisterReceiver(connectivityListener);
 		releaseLocks();
@@ -630,6 +634,11 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 				currentTrack = track;
 				RadioWidgetProvider.updateAppWidget_playing(this, track.getTitle(), track.getCreator(), 0, 0, true, track.getLoved(), false);
 			}
+			if(proxy != null) {
+				proxy.stop();
+				proxy = null;
+			}
+			
 			if(track.getLocationUrl().contains("play.last.fm")) {
 				URL newURL = UrlUtil.getRedirectedUrl(new URL(track.getLocationUrl()));
 				track.setLocationUrl(newURL.toString());
@@ -741,6 +750,11 @@ public class RadioPlayerService extends Service implements MusicFocusable {
             mFocusHelper.abandonMusicFocus();
         if (mRemoteControlClientCompat != null)
             mRemoteControlClientCompat.setPlaybackState(RemoteControlClient.PLAYSTATE_STOPPED);
+        
+        if(proxy != null && proxy.isRunning()) {
+        	proxy.stop();
+        	proxy = null;
+        }
         
 		stopSelf();
 	}

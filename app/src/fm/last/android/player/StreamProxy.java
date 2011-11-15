@@ -66,8 +66,11 @@ public class StreamProxy implements Runnable {
     return port;
   }
 
-  private boolean isRunning = true;
-  private boolean isStreaming = false;
+  public boolean isRunning() {
+	  return isRunning;
+  }
+  
+  private boolean isRunning = false;
   private ServerSocket socket;
   private Thread thread;
 
@@ -85,11 +88,11 @@ public class StreamProxy implements Runnable {
   }
 
   public void start() {
-
     if (socket == null) {
       throw new IllegalStateException("Cannot start proxy; it has not been initialized.");
     }
     
+	isRunning = true;
     thread = new Thread(this);
     thread.start();
   }
@@ -107,7 +110,8 @@ public class StreamProxy implements Runnable {
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
-  }
+    thread = null;
+}
 
   public void run() {
     Log.d(LOG_TAG, "running");
@@ -118,14 +122,9 @@ public class StreamProxy implements Runnable {
           continue;
         }
         Log.d(LOG_TAG, "client connected");
-        if(isStreaming) {
-        	Log.e(LOG_TAG, "One at a time!");
-        	client.close();
-        } else {
-        	isStreaming = true;
-	        HttpRequest request = readRequest(client);
-	        processRequest(request, client);
-        }
+    	HttpRequest request = readRequest(client);
+    	if(isRunning)
+    		processRequest(request, client);
       } catch (SocketTimeoutException e) {
         // Do nothing
       } catch (IOException e) {
@@ -198,6 +197,9 @@ public class StreamProxy implements Runnable {
       return;
     }
 
+    if(!isRunning)
+    	return;
+    
     Log.d(LOG_TAG, "downloading...");
 
     InputStream data = realResponse.getEntity().getContent();
@@ -235,7 +237,7 @@ public class StreamProxy implements Runnable {
         data.close();
       }
       client.close();
-      isStreaming = false;
+      Log.d(LOG_TAG, "streaming complete");
     }
   }
 
