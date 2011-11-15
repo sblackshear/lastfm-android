@@ -183,13 +183,6 @@ public class ContactsSyncAdapterService extends Service {
 						builder.withValue(ContactsContract.StatusUpdates.STATUS_TIMESTAMP, date);
 					}
 					operationList.add(builder.build());
-
-					if(Integer.decode(Build.VERSION.SDK) <= 10) {
-						builder = ContentProviderOperation.newUpdate(ContactsContract.Data.CONTENT_URI);
-						builder.withSelection(BaseColumns._ID + " = '" + c.getLong(0) + "'", null);
-						builder.withValue(ContactsContract.Data.DATA3, status);
-						operationList.add(builder.build());
-					}
 				}
 			}
 		} finally {
@@ -232,8 +225,8 @@ public class ContactsSyncAdapterService extends Service {
 		
 		try {
 			if(url != null && url.length() > 0) {
-				image = UrlUtil.doGetAndReturnBytes(new URL(url), 65535);
-				if(image.length > 0) {
+				image = UrlUtil.doGetAndReturnBytes(new URL(url), 1048576);
+				if(image != null && image.length > 0) {
 					builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI);
 					builder.withValue(ContactsContract.CommonDataKinds.Photo.RAW_CONTACT_ID, rawContactId);
 					builder.withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE);
