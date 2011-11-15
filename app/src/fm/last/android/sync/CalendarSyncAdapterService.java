@@ -102,7 +102,7 @@ public class CalendarSyncAdapterService extends Service {
 			builder.withValue(Calendars.NAME, "Last.fm Events");
 			builder.withValue(Calendars.CALENDAR_DISPLAY_NAME, "Last.fm Events");
 			builder.withValue(Calendars.CALENDAR_COLOR, 0xD51007);
-			builder.withValue(Calendars.CALENDAR_ACCESS_LEVEL, Calendars.CAL_ACCESS_RESPOND);
+			builder.withValue(Calendars.CALENDAR_ACCESS_LEVEL, Calendars.CAL_ACCESS_READ);
 			builder.withValue(Calendars.OWNER_ACCOUNT, account.name);
 			builder.withValue(Calendars.SYNC_EVENTS, 1);
 			operationList.add(builder.build());
@@ -159,7 +159,34 @@ public class CalendarSyncAdapterService extends Service {
 		builder.withValue(Events.DTSTART, dtstart);
 		builder.withValue(Events.DTEND, dtend);
 		builder.withValue(Events.TITLE, event.getTitle());
-		builder.withValue(Events.EVENT_LOCATION, event.getVenue().getName() + "\n" + event.getVenue().getLocation().getCity() + "\n" + event.getVenue().getLocation().getCountry());
+		
+		String location = "";
+		if(event.getVenue().getName().length() > 0)
+			location += event.getVenue().getName() + "\n";
+		if(event.getVenue().getLocation().getCity().length() > 0)
+			location += event.getVenue().getLocation().getCity() + "\n";
+		if(event.getVenue().getLocation().getCountry().length() > 0)
+			location += event.getVenue().getLocation().getCountry() + "\n";
+		
+		builder.withValue(Events.EVENT_LOCATION, location);
+		
+		String description = "http://www.last.fm/event/" + event.getId() + "\n\n";
+		
+		if(event.getArtists().length > 0) {
+			description += "LINEUP\n";
+			for(String artist : event.getArtists()) {
+				description += artist + "\n";
+			}
+			description += "\n";
+		}
+
+		if(event.getDescription() != null && event.getDescription().length() > 0) {
+			description += "MORE DETAILS\n";
+			description += event.getDescription();
+		}
+		
+		builder.withValue(Events.DESCRIPTION, description);
+		
 		if(Integer.valueOf(event.getStatus()) == 1)
 			builder.withValue(Events.STATUS, Events.STATUS_TENTATIVE);
 		else
@@ -178,7 +205,7 @@ public class CalendarSyncAdapterService extends Service {
 		ArrayList<Long> lastfmEvents = new ArrayList<Long>();
 		mContentResolver = context.getContentResolver();
 
-		//If our app has requested a full sync, we're going to delete all our local contacts and start over
+		//If our app has requested a full sync, we're going to delete all our local events and start over
 		boolean is_full_sync = PreferenceManager.getDefaultSharedPreferences(LastFMApplication.getInstance()).getBoolean("do_full_sync", false);
 		
 		//If our schema is out-of-date, do a fresh sync
@@ -190,8 +217,6 @@ public class CalendarSyncAdapterService extends Service {
 			Log.e("CalendarSyncAdapter", "Unable to create Last.fm event calendar");
 			return;
 		}
-		
-		Log.i("CalendarSyncAdapter", "Last.fm events calendar: " + calendar_id);
 		
 		// Load the local Last.fm events
 		Uri eventsUri = Events.CONTENT_URI.buildUpon().appendQueryParameter(Events.CALENDAR_ID, String.valueOf(calendar_id)).build();

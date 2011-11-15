@@ -183,6 +183,11 @@ public class ContactsSyncAdapterService extends Service {
 						builder.withValue(ContactsContract.StatusUpdates.STATUS_TIMESTAMP, date);
 					}
 					operationList.add(builder.build());
+
+					builder = ContentProviderOperation.newUpdate(ContactsContract.Data.CONTENT_URI);
+					builder.withSelection(BaseColumns._ID + " = '" + c.getLong(0) + "'", null);
+					builder.withValue(ContactsContract.Data.DATA3, status);
+					operationList.add(builder.build());
 				}
 			}
 		} finally {
