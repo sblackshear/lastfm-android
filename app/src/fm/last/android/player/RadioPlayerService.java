@@ -73,6 +73,7 @@ import android.preference.PreferenceManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
+import android.widget.RemoteViews;
 import fm.last.android.AndroidLastFmServerFactory;
 import fm.last.android.LastFMApplication;
 import fm.last.android.LastFMMediaButtonHandler;
@@ -434,6 +435,30 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		String info = currentTrack.getTitle() + " - " + currentTrack.getCreator();
 		notification.setLatestEventInfo(this, currentStation.getName(), info, contentIntent);
 		notification.flags |= Notification.FLAG_ONGOING_EVENT;
+		RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.notification);
+		if(mArtwork != null)
+			contentView.setImageViewBitmap(R.id.image, mArtwork);
+		contentView.setTextViewText(R.id.title, currentTrack.getTitle());
+		contentView.setTextViewText(R.id.text, currentTrack.getCreator());
+		PendingIntent pendingIntent;
+		Intent intent;
+
+		intent = new Intent("fm.last.android.widget.LOVE");
+		pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
+		contentView.setOnClickPendingIntent(R.id.love, pendingIntent);
+
+		intent = new Intent("fm.last.android.widget.BAN");
+		pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
+		contentView.setOnClickPendingIntent(R.id.ban, pendingIntent);
+
+		intent = new Intent("fm.last.android.widget.SKIP");
+		pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
+		contentView.setOnClickPendingIntent(R.id.skip, pendingIntent);
+
+		intent = new Intent("fm.last.android.widget.STOP");
+		pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
+		contentView.setOnClickPendingIntent(R.id.stop, pendingIntent);
+		notification.contentView = contentView;
 		RadioWidgetProvider.updateAppWidget(this);
 		try {
 			Class types[] = { int.class, Notification.class };
@@ -1177,6 +1202,37 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		public void onPostExecute(Boolean result) {
 			if(result && currentTrack != null && currentTrack.getAlbum().equals(albumName) && currentTrack.getCreator().equals(artistName)) {
 				mArtwork = art;
+				Notification notification = new Notification(R.drawable.as_statusbar, getString(R.string.playerservice_streaming_ticker_text, currentTrack.getTitle(),
+						currentTrack.getCreator()), System.currentTimeMillis());
+				PendingIntent contentIntent = PendingIntent.getActivity(RadioPlayerService.this, 0, new Intent(RadioPlayerService.this, Player.class), 0);
+				String info = currentTrack.getTitle() + " - " + currentTrack.getCreator();
+				notification.setLatestEventInfo(RadioPlayerService.this, currentStation.getName(), info, contentIntent);
+				notification.flags |= Notification.FLAG_ONGOING_EVENT;
+				RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.notification);
+				contentView.setImageViewBitmap(R.id.image, mArtwork);
+				contentView.setTextViewText(R.id.title, currentTrack.getTitle());
+				contentView.setTextViewText(R.id.text, currentTrack.getCreator());
+				PendingIntent pendingIntent;
+				Intent intent;
+
+				intent = new Intent("fm.last.android.widget.LOVE");
+				pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
+				contentView.setOnClickPendingIntent(R.id.love, pendingIntent);
+
+				intent = new Intent("fm.last.android.widget.BAN");
+				pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
+				contentView.setOnClickPendingIntent(R.id.ban, pendingIntent);
+
+				intent = new Intent("fm.last.android.widget.SKIP");
+				pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
+				contentView.setOnClickPendingIntent(R.id.skip, pendingIntent);
+
+				intent = new Intent("fm.last.android.widget.STOP");
+				pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
+				contentView.setOnClickPendingIntent(R.id.stop, pendingIntent);
+				notification.contentView = contentView;
+				nm.notify(NOTIFY_ID, notification);
+//				notificationContentView.setImageViewBitmap(R.id.image, mArtwork);
 	            // Update the remote controls
 	            mRemoteControlClientCompat.editMetadata(true)
 	                    .putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, currentTrack.getCreator())
