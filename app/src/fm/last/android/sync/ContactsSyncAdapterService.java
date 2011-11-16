@@ -371,14 +371,12 @@ public class ContactsSyncAdapterService extends Service {
 				SyncEntry entry = localContacts.get(username);
 				
 				if(user.getRecentTrack() != null && user.getRecentTrack().getName() != null && user.getRecentTrack().getName().length() > 0) {
-					Log.i("Sync", "User: " + user.getName() + " track: " + user.getRecentTrack().getName());
 					updateContactStatus(operationList, entry.raw_id, user.getRecentTrack());
 				} else {
 					try {
 						Track[] tracks = null;
 						tracks = server.getUserRecentTracks(username, "true", 1);
 						if (tracks.length > 0) {
-							Log.i("Sync", "(fetched) User: " + user.getName() + " track: " + tracks[0].getName());
 							updateContactStatus(operationList, entry.raw_id, tracks[0]);
 						}
 					} catch (Exception e) {
