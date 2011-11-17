@@ -865,9 +865,13 @@ public class RadioWidgetProvider extends AppWidgetProvider {
 					updateAppWidget_playing(ctx, trackName, artistName, position, duration, buffering, loved, state == RadioPlayerService.STATE_PAUSED);
 			} else if (!mediaPlayerPlaying) {
 				if (stationName == null || stationName.length() < 1) {
-					Station station = RecentStationsDao.getInstance().getLastStation();
-					if (station != null)
-						stationName = station.getName();
+					try {
+						Station station = RecentStationsDao.getInstance().getLastStation();
+						if (station != null)
+							stationName = station.getName();
+					} catch (Exception e) {
+						
+					}
 				}
 				updateAppWidget_idle(ctx, stationName, state == RadioPlayerService.STATE_TUNING);
 			}
