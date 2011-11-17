@@ -1230,7 +1230,11 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 				pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
 				contentView.setOnClickPendingIntent(R.id.stop, pendingIntent);
 				notification.contentView = contentView;
-				nm.notify(NOTIFY_ID, notification);
+				try {
+					nm.notify(NOTIFY_ID, notification);
+				} catch(Exception e) {
+					
+				}
 	            // Update the remote controls
 	            mRemoteControlClientCompat.editMetadata(true)
 	                    .putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, currentTrack.getCreator())

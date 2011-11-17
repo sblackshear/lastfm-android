@@ -35,7 +35,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import fm.last.android.utils.AsyncTaskEx;
 import android.os.Bundle;
@@ -55,6 +54,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Animation.AnimationListener;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import fm.last.android.Amazon;
@@ -64,7 +64,6 @@ import fm.last.android.R;
 import fm.last.android.player.IRadioPlayer;
 import fm.last.android.player.RadioPlayerService;
 import fm.last.android.widget.AdArea;
-import fm.last.android.widget.AlbumArt;
 import fm.last.api.Event;
 import fm.last.api.LastFmServer;
 import fm.last.api.Station;
@@ -77,7 +76,7 @@ public class Player extends Activity {
 	private ImageButton mStopButton;
 	private ImageButton mNextButton;
 	private ImageButton mOntourButton;
-	private AlbumArt mAlbum;
+	private ImageView mAlbum;
 	private TextView mCurrentTime;
 	private TextView mTotalTime;
 	private TextView mArtistName;
@@ -115,7 +114,7 @@ public class Player extends Activity {
 		mTotalTime = (TextView) findViewById(R.id.totaltime);
 		mProgress = (ProgressBar) findViewById(android.R.id.progress);
 		mProgress.setMax(1000);
-		mAlbum = (AlbumArt) findViewById(R.id.album);
+		mAlbum = (ImageView) findViewById(R.id.album);
 		LayoutParams params = mAlbum.getLayoutParams();
 		if (AdArea.adsEnabled(this)) {
 			params.width -= 54;
@@ -417,7 +416,6 @@ public class Player extends Activity {
 
 	@Override
 	public void onDestroy() {
-		mAlbum.cancel();
 		super.onDestroy();
 	}
 

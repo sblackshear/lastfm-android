@@ -32,10 +32,10 @@
 				android:layout_height="54px"
 				android:padding="6dip"/>
 				
-			<fm.last.android.widget.AlbumArt
+			<ImageView
 				android:id="@+id/album" android:gravity="center"
 				android:layout_centerHorizontal="true" style="@+style/playback_artwork"
-				android:layout_below="@id/AdArea"/>
+				android:layout_below="@id/AdArea" android:src="@drawable/no_artwork"/>
 
 			<LinearLayout android:layout_width="fill_parent" android:visibility="gone"
 				android:layout_height="38dip"
@@ -73,12 +73,12 @@
 				android:orientation="horizontal" android:layout_gravity="bottom"
 				android:layout_marginTop="0dip" android:layout_height="76dip"
 				android:layout_width="fill_parent" android:gravity="center"
-				android:layout_alignParentBottom="true">
+				android:layout_alignParentBottom="true" android:weightSum="100">
 
-				<ImageButton android:id="@+id/love" style="@+style/LastFMButton.Love" android:contentDescription="@string/action_love"/>
-				<ImageButton android:id="@+id/ban" style="@+style/LastFMButton.Ban" android:contentDescription="@string/action_ban"/>
-				<ImageButton android:id="@+id/stop" style="@+style/LastFMButton.Stop" android:contentDescription="@string/action_stop"/>
-				<ImageButton android:id="@+id/skip" style="@+style/LastFMButton.Skip" android:contentDescription="@string/action_skip"/>
+				<ImageButton android:id="@+id/love" style="@+style/LastFMButton.Love" android:contentDescription="@string/action_love" android:layout_weight="25" android:layout_width="fill_parent" android:layout_height="fill_parent" android:background="@drawable/player_controls" android:src="@drawable/love"/>
+				<ImageButton android:id="@+id/ban" style="@+style/LastFMButton.Ban" android:contentDescription="@string/action_ban" android:layout_weight="25" android:layout_width="fill_parent" android:layout_height="fill_parent" android:background="@drawable/player_controls" android:src="@drawable/ban"/>
+				<ImageButton android:id="@+id/stop" style="@+style/LastFMButton.Stop" android:contentDescription="@string/action_stop" android:layout_weight="25" android:layout_width="fill_parent" android:layout_height="fill_parent" android:background="@drawable/player_controls" android:src="@drawable/stop"/>
+				<ImageButton android:id="@+id/skip" style="@+style/LastFMButton.Skip" android:contentDescription="@string/action_skip" android:layout_weight="25" android:layout_width="fill_parent" android:layout_height="fill_parent" android:background="@drawable/player_controls" android:src="@drawable/skip"/>
 
 			</LinearLayout>
 
@@ -117,7 +117,7 @@
 					android:layout_marginTop="4dip">
 
 					<LinearLayout android:layout_width="fill_parent"
-						android:layout_height="wrap_content">
+						android:layout_height="wrap_content" android:layout_marginLeft="10dip" android:layout_marginRight="10dip">
 
 						<TextView android:id="@+id/currenttime" style="@style/playback_time"
 							android:layout_gravity="bottom"
@@ -130,7 +130,7 @@
 							android:paddingLeft="5dip" android:paddingRight="5dip"
 							android:layout_marginLeft="5dip" android:layout_marginRight="5dip"
 							android:indeterminateOnly="false" android:progressDrawable="@drawable/progress_horizontal"
-							style="@style/playback_progress" android:layout_gravity="center_vertical" />
+							style="@style/playback_progress" android:layout_gravity="center_vertical" android:layout_weight="1"/>
 
 						<TextView android:id="@+id/totaltime" style="@style/playback_time"
 							android:layout_gravity="bottom"
