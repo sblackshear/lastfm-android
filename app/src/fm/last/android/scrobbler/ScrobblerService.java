@@ -358,6 +358,46 @@ public class ScrobblerService extends Service {
 		}
 	}
 
+	public long lookupDuration(String artist, String track) {
+		final String[] columns = new String[] {
+				MediaStore.Audio.AudioColumns.DURATION };
+		
+		//Search the artist/title on external storage
+		Cursor cur = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, columns, 
+				MediaStore.Audio.AudioColumns.ARTIST + " = ? and " + MediaStore.Audio.AudioColumns.TITLE + " = ?", new String[] { artist, track}, null);
+
+		if(cur != null && cur.moveToFirst()) {
+			logger.info("Found on external");
+			return cur.getLong(cur.getColumnIndex(MediaStore.Audio.AudioColumns.DURATION));
+		}
+		
+		//Search the artist/title on internal storage
+		cur = getContentResolver().query(MediaStore.Audio.Media.INTERNAL_CONTENT_URI, columns, 
+				MediaStore.Audio.AudioColumns.ARTIST + " = ? and " + MediaStore.Audio.AudioColumns.TITLE + " = ?", new String[] { artist, track}, null);
+
+		if(cur != null && cur.moveToFirst()) {
+			logger.info("Found on internal");
+			return cur.getLong(cur.getColumnIndex(MediaStore.Audio.AudioColumns.DURATION));
+		}
+
+		//If we're allowed to connect to the network, look up the track info on Last.fm
+		ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+		NetworkInfo ni = cm.getActiveNetworkInfo();
+		if(ni != null) {
+			boolean scrobbleWifiOnly = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("scrobble_wifi_only", false);
+			if (cm.getBackgroundDataSetting() && (!scrobbleWifiOnly || (scrobbleWifiOnly && ni.getType() == ConnectivityManager.TYPE_WIFI))) {
+				logger.info("Looking up track duration");
+				LastFmServer server = AndroidLastFmServerFactory.getServer();
+				try {
+					Track t = server.getTrackInfo(artist, track, "");
+					return Long.parseLong(t.getDuration());
+				} catch (IOException e) {
+				}
+			}
+		}
+		return 0;
+	}
+	
 	public Intent intentFromMediaDB(Intent intent) {
 		final Intent i = intent;
 
@@ -381,6 +421,24 @@ public class ScrobblerService extends Service {
 			i.setAction(PLAYBACK_FINISHED);
 		} else {
 			i.setAction(META_CHANGED);
+			
+			//convert the duration from int to long
+			long duration = intent.getIntExtra("secs", 0);
+			i.removeExtra("secs");
+			i.putExtra("duration", duration * 1000);
+
+			//Try to find the duration in the media db, otherwise get it from last.fm
+			if(i.getStringExtra("artist") != null && i.getStringExtra("track") != null) {
+				duration = i.getLongExtra("duration", 0);
+				if(duration == 0) {
+					duration = lookupDuration(i.getStringExtra("artist"), i.getStringExtra("track"));
+					logger.info("Got duration: " + duration);
+					i.putExtra("duration", duration);
+				}
+				return i;
+			}
+			
+			//If there was no artist / track in the intent, try to look up the id in the media db
 			long id = -1;
 			try {
 				id = intent.getIntExtra("id", -1);
@@ -419,31 +477,7 @@ public class ScrobblerService extends Service {
 					if (!cur.moveToFirst()) {
 					        logger.info("no such media in media store: " + id);
 					        cur.close();
-					        //This isn't fatal if the intent still contains the artist and track,
-					        //however without the duration, the track will be scrobbled regardless of whether
-					        //it's passed the scrobble point or not.  Also, Now Playing requests require a
-					        //duration so they expire properly on the site, so they wont appear.
-					        if(i.getStringExtra("artist") == null || i.getStringExtra("track") == null) {
-					        	return null;
-					        } else {
-					        	long duration = 0;
-								ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-								NetworkInfo ni = cm.getActiveNetworkInfo();
-								if(ni != null) {
-									boolean scrobbleWifiOnly = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("scrobble_wifi_only", false);
-									if (cm.getBackgroundDataSetting() && (!scrobbleWifiOnly || (scrobbleWifiOnly && ni.getType() == ConnectivityManager.TYPE_WIFI))) {
-										logger.info("Looking up track duration");
-										LastFmServer server = AndroidLastFmServerFactory.getServer();
-										try {
-											Track track = server.getTrackInfo(i.getStringExtra("artist"), i.getStringExtra("track"), "");
-											duration = Long.parseLong(track.getDuration());
-											logger.info("Duration: " + duration);
-										} catch (IOException e) {
-										}
-									}
-								}
-					        	i.putExtra("duration", duration);
-					        }
+				        	return null;
 					} else {
 						String artist = cur.getString(cur.getColumnIndex(MediaStore.Audio.AudioColumns.ARTIST));
 						if(i.getStringExtra("artist") == null)
@@ -457,7 +491,7 @@ public class ScrobblerService extends Service {
 						if(i.getStringExtra("album") == null)
 							i.putExtra("album", album);
 						
-						long duration = cur.getLong(cur.getColumnIndex(MediaStore.Audio.AudioColumns.DURATION));
+						duration = cur.getLong(cur.getColumnIndex(MediaStore.Audio.AudioColumns.DURATION));
 						if (duration != 0) {
 						    i.putExtra("duration", duration);
 						}
@@ -465,11 +499,6 @@ public class ScrobblerService extends Service {
 	            } finally {
 	                    cur.close();
 	            }
-            } else {
-				//convert the duration from int to long
-				long duration = intent.getIntExtra("secs", 0);
-				i.removeExtra("secs");
-				i.putExtra("duration", duration * 1000);
 			}
 		}
 		return i;
