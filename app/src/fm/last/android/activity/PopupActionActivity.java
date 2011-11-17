@@ -152,7 +152,7 @@ public class PopupActionActivity extends ListActivity {
 			intent.putExtra("lastfm.track", mTrackName);
 			startActivity(intent);
 			break;
-		case R.drawable.love:
+		case R.drawable.loved:
 			try {
 				LastFmServer server = AndroidLastFmServerFactory.getServer();
 				server.loveTrack(mArtistName, mTrackName, LastFMApplication.getInstance().session.getKey());
