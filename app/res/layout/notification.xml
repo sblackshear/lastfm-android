@@ -18,13 +18,13 @@
                 android:id="@+id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Track Title" style="@style/NotificationTitle"/>
+                android:text="Track Title" style="@style/NotificationTitle" android:ellipsize="end" android:maxLines="2"/>
 
             <TextView
                 android:id="@+id/text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Artist Name" style="@style/NotificationText"/>
+                android:text="Artist Name" style="@style/NotificationText" android:maxLines="1" android:ellipsize="end"/>
 
         </LinearLayout>
 
