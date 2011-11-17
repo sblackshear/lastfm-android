@@ -724,7 +724,6 @@ public class RadioPlayerService extends Service implements MusicFocusable {
             // Update the remote controls
             mRemoteControlClientCompat.editMetadata(true)
                     .putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, track.getCreator())
-                    .putString(MediaMetadataRetriever.METADATA_KEY_ALBUM, track.getAlbum())
                     .putString(MediaMetadataRetriever.METADATA_KEY_TITLE, track.getTitle())
                     .putLong(MediaMetadataRetriever.METADATA_KEY_DURATION,
                             track.getDuration())
@@ -1232,11 +1231,9 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 				contentView.setOnClickPendingIntent(R.id.stop, pendingIntent);
 				notification.contentView = contentView;
 				nm.notify(NOTIFY_ID, notification);
-//				notificationContentView.setImageViewBitmap(R.id.image, mArtwork);
 	            // Update the remote controls
 	            mRemoteControlClientCompat.editMetadata(true)
 	                    .putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, currentTrack.getCreator())
-	                    .putString(MediaMetadataRetriever.METADATA_KEY_ALBUM, currentTrack.getAlbum())
 	                    .putString(MediaMetadataRetriever.METADATA_KEY_TITLE, currentTrack.getTitle())
 	                    .putLong(MediaMetadataRetriever.METADATA_KEY_DURATION,
 	                    		currentTrack.getDuration())

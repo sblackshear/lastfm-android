@@ -58,6 +58,7 @@ import fm.last.android.db.ScrobblerQueueDao;
 import fm.last.api.LastFmServer;
 import fm.last.api.RadioTrack;
 import fm.last.api.Session;
+import fm.last.api.Track;
 import fm.last.api.WSError;
 
 /**
@@ -280,10 +281,10 @@ public class ScrobblerService extends Service {
 				    	   }
 				       }, 0);
 					} catch (Exception e) {
-						intentFromMediaDB(i);
+						new IntentFromMediaDBTask(i).execute((Void)null);
 					}
 				} else {
-					intentFromMediaDB(i);
+					new IntentFromMediaDBTask(i).execute((Void)null);
 				}
 			} else {
 				// Clear the current track in case the user has disabled
@@ -351,13 +352,13 @@ public class ScrobblerService extends Service {
 				handleIntent(i);
 			}
 		} else if(intent.getAction().equals("net.jjc1138.android.scrobbler.action.MUSIC_STATUS")) {
-			intentFromMediaDB(intent);
+			new IntentFromMediaDBTask(i).execute((Void)null);
 		} else { //
 			handleIntent(i);
 		}
 	}
 
-	public void intentFromMediaDB(Intent intent) {
+	public Intent intentFromMediaDB(Intent intent) {
 		final Intent i = intent;
 
 		boolean playing = false;
@@ -404,7 +405,7 @@ public class ScrobblerService extends Service {
 				
 				if (cur == null) {
 					logger.severe("could not open cursor to media in media store");
-					return;
+					return null;
 				}
 	
 	            try {
@@ -422,10 +423,27 @@ public class ScrobblerService extends Service {
 					        //however without the duration, the track will be scrobbled regardless of whether
 					        //it's passed the scrobble point or not.  Also, Now Playing requests require a
 					        //duration so they expire properly on the site, so they wont appear.
-					        if(i.getStringExtra("artist") == null || i.getStringExtra("track") == null)
-					        	return;
-					        else
-					        	i.putExtra("duration", 0);
+					        if(i.getStringExtra("artist") == null || i.getStringExtra("track") == null) {
+					        	return null;
+					        } else {
+					        	long duration = 0;
+								ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+								NetworkInfo ni = cm.getActiveNetworkInfo();
+								if(ni != null) {
+									boolean scrobbleWifiOnly = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("scrobble_wifi_only", false);
+									if (cm.getBackgroundDataSetting() && (!scrobbleWifiOnly || (scrobbleWifiOnly && ni.getType() == ConnectivityManager.TYPE_WIFI))) {
+										logger.info("Looking up track duration");
+										LastFmServer server = AndroidLastFmServerFactory.getServer();
+										try {
+											Track track = server.getTrackInfo(i.getStringExtra("artist"), i.getStringExtra("track"), "");
+											duration = Long.parseLong(track.getDuration());
+											logger.info("Duration: " + duration);
+										} catch (IOException e) {
+										}
+									}
+								}
+					        	i.putExtra("duration", duration);
+					        }
 					} else {
 						String artist = cur.getString(cur.getColumnIndex(MediaStore.Audio.AudioColumns.ARTIST));
 						if(i.getStringExtra("artist") == null)
@@ -454,7 +472,7 @@ public class ScrobblerService extends Service {
 				i.putExtra("duration", duration * 1000);
 			}
 		}
-		handleIntent(i);
+		return i;
 	}
 	
 	public void handleIntent(Intent intent) {
@@ -582,6 +600,24 @@ public class ScrobblerService extends Service {
 	@Override
 	public IBinder onBind(Intent intent) {
 		return null;
+	}
+
+	private class IntentFromMediaDBTask extends AsyncTaskEx<Void, Void, Intent> {
+		Intent intent;
+		
+		public IntentFromMediaDBTask(Intent i) {
+			intent = i;
+		}
+
+		@Override
+		public Intent doInBackground(Void... params) {
+			return intentFromMediaDB(intent);
+		}
+
+		@Override
+		public void onPostExecute(Intent result) {
+			handleIntent(result);
+		}
 	}
 
 	private class ClearNowPlayingTask extends AsyncTaskEx<Void, Void, Boolean> {
