@@ -367,7 +367,6 @@ public class ScrobblerService extends Service {
 				MediaStore.Audio.AudioColumns.ARTIST + " = ? and " + MediaStore.Audio.AudioColumns.TITLE + " = ?", new String[] { artist, track}, null);
 
 		if(cur != null && cur.moveToFirst()) {
-			logger.info("Found on external");
 			return cur.getLong(cur.getColumnIndex(MediaStore.Audio.AudioColumns.DURATION));
 		}
 		
@@ -376,7 +375,6 @@ public class ScrobblerService extends Service {
 				MediaStore.Audio.AudioColumns.ARTIST + " = ? and " + MediaStore.Audio.AudioColumns.TITLE + " = ?", new String[] { artist, track}, null);
 
 		if(cur != null && cur.moveToFirst()) {
-			logger.info("Found on internal");
 			return cur.getLong(cur.getColumnIndex(MediaStore.Audio.AudioColumns.DURATION));
 		}
 
@@ -386,7 +384,6 @@ public class ScrobblerService extends Service {
 		if(ni != null) {
 			boolean scrobbleWifiOnly = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("scrobble_wifi_only", false);
 			if (cm.getBackgroundDataSetting() && (!scrobbleWifiOnly || (scrobbleWifiOnly && ni.getType() == ConnectivityManager.TYPE_WIFI))) {
-				logger.info("Looking up track duration");
 				LastFmServer server = AndroidLastFmServerFactory.getServer();
 				try {
 					Track t = server.getTrackInfo(artist, track, "");
@@ -432,7 +429,6 @@ public class ScrobblerService extends Service {
 				duration = i.getLongExtra("duration", 0);
 				if(duration == 0) {
 					duration = lookupDuration(i.getStringExtra("artist"), i.getStringExtra("track"));
-					logger.info("Got duration: " + duration);
 					i.putExtra("duration", duration);
 				}
 				return i;
@@ -579,6 +575,10 @@ public class ScrobblerService extends Service {
 		}
 		if (intent.getAction().equals(PLAYBACK_FINISHED) || intent.getAction().equals("com.android.music.playbackcomplete")
 				|| intent.getAction().equals("com.htc.music.playbackcomplete")) {
+			if(mCurrentTrack != null) {
+				mClearNowPlayingTask = new ClearNowPlayingTask(mCurrentTrack.toRadioTrack());
+				mClearNowPlayingTask.execute();
+			}
 			enqueueCurrentTrack();
 			NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			nm.cancel(1338);
