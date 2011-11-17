@@ -35,7 +35,6 @@ public class Preferences extends PreferenceActivity {
 			addPreferencesFromResource(R.xml.preferences_sync);
 			findPreference("sync_icons").setOnPreferenceChangeListener(syncToggle);
 			findPreference("sync_names").setOnPreferenceChangeListener(syncToggle);
-			findPreference("sync_taste").setOnPreferenceChangeListener(syncToggle);
 		}
 		addPreferencesFromResource(R.xml.preferences_about);
 		findPreference("scrobble").setOnPreferenceChangeListener(scrobbletoggle);

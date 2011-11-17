@@ -130,7 +130,7 @@
 							android:paddingLeft="5dip" android:paddingRight="5dip"
 							android:layout_marginLeft="5dip" android:layout_marginRight="5dip"
 							android:indeterminateOnly="false" android:progressDrawable="@drawable/progress_horizontal"
-							style="@style/playback_progress" android:layout_gravity="center_vertical" android:layout_weight="1"/>
+							android:layout_gravity="center_vertical" android:layout_weight="1"/>
 
 						<TextView android:id="@+id/totaltime" style="@style/playback_time"
 							android:layout_gravity="bottom"
