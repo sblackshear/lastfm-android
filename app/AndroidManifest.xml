@@ -155,7 +155,11 @@
 				<action android:name="android.intent.action.VIEW" />
 				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
-		</activity>
+		    <intent-filter>
+		       <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
+		       <category android:name="android.intent.category.DEFAULT" />
+		    </intent-filter>
+    		</activity>
 		<activity android:name=".activity.PopupActionActivity"
 			android:theme="@android:style/Theme.Dialog">
 			<intent-filter>

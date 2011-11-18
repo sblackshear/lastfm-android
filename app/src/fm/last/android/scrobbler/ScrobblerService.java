@@ -383,7 +383,7 @@ public class ScrobblerService extends Service {
 		NetworkInfo ni = cm.getActiveNetworkInfo();
 		if(ni != null) {
 			boolean scrobbleWifiOnly = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("scrobble_wifi_only", false);
-			if (cm.getBackgroundDataSetting() && (!scrobbleWifiOnly || (scrobbleWifiOnly && ni.getType() == ConnectivityManager.TYPE_WIFI))) {
+			if (cm.getBackgroundDataSetting() && ni.isConnected() && (!scrobbleWifiOnly || (scrobbleWifiOnly && ni.getType() == ConnectivityManager.TYPE_WIFI))) {
 				LastFmServer server = AndroidLastFmServerFactory.getServer();
 				try {
 					Track t = server.getTrackInfo(artist, track, "");
@@ -551,7 +551,7 @@ public class ScrobblerService extends Service {
 				NetworkInfo ni = cm.getActiveNetworkInfo();
 				if (ni != null) {
 					boolean scrobbleWifiOnly = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("scrobble_wifi_only", false);
-					if (cm.getBackgroundDataSetting() && (!scrobbleWifiOnly || (scrobbleWifiOnly && ni.getType() == ConnectivityManager.TYPE_WIFI) || auth != null && mNowPlayingTask == null)) {
+					if (cm.getBackgroundDataSetting() && ni.isConnected() && (!scrobbleWifiOnly || (scrobbleWifiOnly && ni.getType() == ConnectivityManager.TYPE_WIFI) || auth != null && mNowPlayingTask == null)) {
 						mNowPlayingTask = new NowPlayingTask(mCurrentTrack.toRadioTrack());
 						mNowPlayingTask.execute();
 					}
@@ -606,7 +606,7 @@ public class ScrobblerService extends Service {
 			NetworkInfo ni = cm.getActiveNetworkInfo();
 			if(ni != null) {
 				boolean scrobbleWifiOnly = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("scrobble_wifi_only", false);
-				if (cm.getBackgroundDataSetting() && (!scrobbleWifiOnly || (scrobbleWifiOnly && ni.getType() == ConnectivityManager.TYPE_WIFI))) {
+				if (cm.getBackgroundDataSetting() && ni.isConnected() && (!scrobbleWifiOnly || (scrobbleWifiOnly && ni.getType() == ConnectivityManager.TYPE_WIFI))) {
 					int queueSize = ScrobblerQueueDao.getInstance().getQueueSize();
 					if (queueSize > 0 && mSubmissionTask == null) {
 						mSubmissionTask = new SubmitTracksTask();
