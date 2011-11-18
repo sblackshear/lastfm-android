@@ -666,7 +666,10 @@ public class Player extends Activity {
 							String[] trackContext = player.getContext();
 							String stationURL = player.getStationUrl();
 							loved = player.getLoved();
-							mAlbum.setImageBitmap(player.getArtwork());
+							if(player.getArtwork() != null)
+								mAlbum.setImageBitmap(player.getArtwork());
+							else
+								mAlbum.setImageResource(R.drawable.no_artwork);
 							
 							if (loved) {
 								mLoveButton.setImageResource(R.drawable.loved);

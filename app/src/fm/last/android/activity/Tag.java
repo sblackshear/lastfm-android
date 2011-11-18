@@ -389,6 +389,8 @@ public class Tag extends Activity {
 				mServer.addArtistTags(mArtist, tag, mSession.getKey());
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (WSError e) {
+			LastFMApplication.getInstance().presentError(this, e);
 		}
 
 		for (int i = 0; i < removeTags.size(); i++) {
@@ -399,6 +401,8 @@ public class Tag extends Activity {
 					mServer.removeArtistTag(mArtist, removeTags.get(i), mSession.getKey());
 			} catch (IOException e) {
 				e.printStackTrace();
+			} catch (WSError e) {
+				LastFMApplication.getInstance().presentError(this, e);
 			}
 		}
 

@@ -33,19 +33,19 @@ public interface LastFmServer {
 	 * @return
 	 * @throws IOException
 	 */
-	public Artist[] getSimilarArtists(String artist, String limit) throws IOException;
+	public Artist[] getSimilarArtists(String artist, String limit) throws IOException, WSError;
 
-	public Artist[] searchForArtist(String artist) throws IOException;
+	public Artist[] searchForArtist(String artist) throws IOException, WSError;
 
-	public Artist[] topArtistsForTag(String tag) throws IOException;
+	public Artist[] topArtistsForTag(String tag) throws IOException, WSError;
 
-	public Tag[] searchForTag(String Tag) throws IOException;
+	public Tag[] searchForTag(String Tag) throws IOException, WSError;
 
-	public Track[] searchForTrack(String track) throws IOException;
+	public Track[] searchForTrack(String track) throws IOException, WSError;
 
-	public Event[] searchForEvent(String event) throws IOException;
+	public Event[] searchForEvent(String event) throws IOException, WSError;
 
-	public Event[] searchForFestival(String event) throws IOException;
+	public Event[] searchForFestival(String event) throws IOException, WSError;
 
 	/**
 	 * See http://www.last.fm/api/show?service=263
@@ -56,7 +56,7 @@ public interface LastFmServer {
 	 * @return
 	 * @throws IOException
 	 */
-	public Friends getFriends(String user, String recenttracks, String limit) throws IOException;
+	public Friends getFriends(String user, String recenttracks, String limit) throws IOException, WSError;
 
 	/**
 	 * See http://www.last.fm/api/show?service=356
@@ -67,7 +67,7 @@ public interface LastFmServer {
 	 * @return
 	 * @throws IOException
 	 */
-	public Track getTrackInfo(String artist, String track, String mbid) throws IOException;
+	public Track getTrackInfo(String artist, String track, String mbid) throws IOException, WSError;
 
 	/**
 	 * See http://www.last.fm/api/show?service=266
@@ -78,20 +78,20 @@ public interface LastFmServer {
 	 * @return
 	 * @throws IOException
 	 */
-	public Session getMobileSession(String username, String authToken) throws IOException;
+	public Session getMobileSession(String username, String authToken) throws IOException, WSError;
 	
 	public SessionInfo getSessionInfo(String sk) throws IOException, WSError;
 
-	public void signUp(String username, String password, String email) throws IOException;
+	public void signUp(String username, String password, String email) throws IOException, WSError;
 
-	public Station tuneToStation(String station, String sk, String lang) throws IOException;
+	public Station tuneToStation(String station, String sk, String lang) throws IOException, WSError;
 
-	public RadioPlayList getRadioPlayList(String bitrate, String rtp, String discovery, String multiplier, String sk) throws IOException;
+	public RadioPlayList getRadioPlayList(String bitrate, String rtp, String discovery, String multiplier, String sk) throws IOException, WSError;
 
-	public User getUserInfo(String user, String sk) throws IOException;
+	public User getUserInfo(String user, String sk) throws IOException, WSError;
 
-	public Geo getGeo() throws IOException;
-	public List<Metro> getMetros() throws IOException;
+	public Geo getGeo() throws IOException, WSError;
+	public List<Metro> getMetros() throws IOException, WSError;
 	
 	/**
 	 * See http://www.lastfm.pl/api/show?service=289
@@ -105,9 +105,9 @@ public interface LastFmServer {
 	 * @return array of tags
 	 * @throws IOException
 	 */
-	public Tag[] getTrackTopTags(String artist, String track, String mbid) throws IOException;
+	public Tag[] getTrackTopTags(String artist, String track, String mbid) throws IOException, WSError;
 
-	public Tag[] getArtistTopTags(String artist, String mbid) throws IOException;
+	public Tag[] getArtistTopTags(String artist, String mbid) throws IOException, WSError;
 
 	/**
 	 * See http://www.lastfm.pl/api/show?service=123
@@ -117,7 +117,7 @@ public interface LastFmServer {
 	 * @return An array of tags
 	 * @throws IOException
 	 */
-	public Tag[] getUserTopTags(String user, Integer limit) throws IOException;
+	public Tag[] getUserTopTags(String user, Integer limit) throws IOException, WSError;
 
 	/**
 	 * See http://www.lastfm.pl/api/show?service=300
@@ -128,9 +128,9 @@ public interface LastFmServer {
 	 * @return An array of artists
 	 * @throws IOException
 	 */
-	public Artist[] getUserTopArtists(String user, String period) throws IOException;
+	public Artist[] getUserTopArtists(String user, String period) throws IOException, WSError;
 
-	public Artist[] getUserRecommendedArtists(String user, String period) throws IOException;
+	public Artist[] getUserRecommendedArtists(String user, String period) throws IOException, WSError;
 
 	/**
 	 * See http://www.lastfm.pl/api/show?service=299
@@ -141,7 +141,7 @@ public interface LastFmServer {
 	 * @return An array of albums
 	 * @throws IOException
 	 */
-	public Album[] getUserTopAlbums(String user, String period) throws IOException;
+	public Album[] getUserTopAlbums(String user, String period) throws IOException, WSError;
 
 	/**
 	 * See http://www.lastfm.pl/api/show?service=301
@@ -152,7 +152,7 @@ public interface LastFmServer {
 	 * @return An array of tracks
 	 * @throws IOException
 	 */
-	public Track[] getUserTopTracks(String user, String period) throws IOException;
+	public Track[] getUserTopTracks(String user, String period) throws IOException, WSError;
 
 	/**
 	 * See http://www.lastfm.pl/api/show?service=278
@@ -163,7 +163,7 @@ public interface LastFmServer {
 	 * @return An array of tracks
 	 * @throws IOException
 	 */
-	public Track[] getUserRecentTracks(String user, String nowPlaying, int limit) throws IOException;
+	public Track[] getUserRecentTracks(String user, String nowPlaying, int limit) throws IOException, WSError;
 
 	/**
 	 * See http://www.lastfm.pl/api/show?service=320
@@ -178,9 +178,9 @@ public interface LastFmServer {
 	 * @return An array of tags
 	 * @throws IOException
 	 */
-	public Tag[] getTrackTags(String artist, String track, String sk) throws IOException;
+	public Tag[] getTrackTags(String artist, String track, String sk) throws IOException, WSError;
 
-	public Tag[] getArtistTags(String artist, String sk) throws IOException;
+	public Tag[] getArtistTags(String artist, String sk) throws IOException, WSError;
 
 	/**
 	 * See http://www.lastfm.pl/api/show?service=304
@@ -196,9 +196,9 @@ public interface LastFmServer {
 	 *            authentication protocol.
 	 * @throws IOException
 	 */
-	public void addTrackTags(String artist, String track, String[] tag, String sk) throws IOException;
+	public void addTrackTags(String artist, String track, String[] tag, String sk) throws IOException, WSError;
 
-	public void addArtistTags(String artist, String[] tag, String sk) throws IOException;
+	public void addArtistTags(String artist, String[] tag, String sk) throws IOException, WSError;
 
 	/**
 	 * See http://www.lastfm.pl/api/show?service=316
@@ -214,9 +214,9 @@ public interface LastFmServer {
 	 *            authentication protocol.
 	 * @throws IOException
 	 */
-	public void removeTrackTag(String artist, String track, String tag, String sk) throws IOException;
+	public void removeTrackTag(String artist, String track, String tag, String sk) throws IOException, WSError;
 
-	public void removeArtistTag(String artist, String tag, String sk) throws IOException;
+	public void removeArtistTag(String artist, String tag, String sk) throws IOException, WSError;
 
 	/**
 	 * See http://www.last.fm/api/show?service=267
@@ -233,7 +233,7 @@ public interface LastFmServer {
 	 * @return Artist instance
 	 * @throws IOException
 	 */
-	public Artist getArtistInfo(String artist, String mbid, String lang, String username) throws IOException;
+	public Artist getArtistInfo(String artist, String mbid, String lang, String username) throws IOException, WSError;
 
 	/**
 	 * See http://www.lastfm.pl/api/show?service=312
@@ -247,9 +247,9 @@ public interface LastFmServer {
 	 * @return top fans array
 	 * @throws IOException
 	 */
-	public User[] getTrackTopFans(String track, String artist, String mbid) throws IOException;
+	public User[] getTrackTopFans(String track, String artist, String mbid) throws IOException, WSError;
 
-	public User[] getArtistTopFans(String artist, String mbid) throws IOException;
+	public User[] getArtistTopFans(String artist, String mbid) throws IOException, WSError;
 
 	/**
 	 * See http://www.lastfm.pl/api/show?service=117
@@ -259,7 +259,7 @@ public interface LastFmServer {
 	 * @return artist events array
 	 * @throws IOException
 	 */
-	public Event[] getArtistEvents(String artist) throws IOException;
+	public Event[] getArtistEvents(String artist) throws IOException, WSError;
 
 	/**
 	 * See http://www.lastfm.pl/api/show?service=291
@@ -269,16 +269,16 @@ public interface LastFmServer {
 	 * @return user events array
 	 * @throws IOException
 	 */
-	public Event[] getUserEvents(String user) throws IOException;
-	public Event[] getPastUserEvents(String user) throws IOException;
-	public Event[] getUserFriendsEvents(String user) throws IOException;
-	public Event getEventInfo(String event, String sk) throws IOException;
-	public Event[] getUserRecommendedEvents(String user, String sk) throws IOException;
-	public Event[] getNearbyEvents(String latitude, String longitude) throws IOException;
-	public Event[] getFestivalsForMetro(String metro, int page, String sk) throws IOException;
-	public Event[] getUserFestivals(String user) throws IOException;
-	public Event[] getUserFriendsFestivals(String user) throws IOException;
-	public Artist[] getRecommendedLineupForEvent(String event, String sk) throws IOException;
+	public Event[] getUserEvents(String user) throws IOException, WSError;
+	public Event[] getPastUserEvents(String user) throws IOException, WSError;
+	public Event[] getUserFriendsEvents(String user) throws IOException, WSError;
+	public Event getEventInfo(String event, String sk) throws IOException, WSError;
+	public Event[] getUserRecommendedEvents(String user, String sk) throws IOException, WSError;
+	public Event[] getNearbyEvents(String latitude, String longitude) throws IOException, WSError;
+	public Event[] getFestivalsForMetro(String metro, int page, String sk) throws IOException, WSError;
+	public Event[] getUserFestivals(String user) throws IOException, WSError;
+	public Event[] getUserFriendsFestivals(String user) throws IOException, WSError;
+	public Artist[] getRecommendedLineupForEvent(String event, String sk) throws IOException, WSError;
 
 	
 	/**
@@ -300,7 +300,7 @@ public interface LastFmServer {
 	 *            (Required) : The artist name you wish to add
 	 * @throws IOException
 	 */
-	public void libraryAddArtist(String artist, String sk) throws IOException;
+	public void libraryAddArtist(String artist, String sk) throws IOException, WSError;
 
 	/**
 	 * See http://www.lastfm.pl/api/show?service=370
@@ -309,7 +309,7 @@ public interface LastFmServer {
 	 *            (Required) : The album name you wish to add
 	 * @throws IOException
 	 */
-	public void libraryAddAlbum(String album, String sk) throws IOException;
+	public void libraryAddAlbum(String album, String sk) throws IOException, WSError;
 
 	/**
 	 * See http://www.lastfm.pl/api/show?service=372
@@ -318,7 +318,7 @@ public interface LastFmServer {
 	 *            (Required) : The track name you wish to add
 	 * @throws IOException
 	 */
-	public void libraryAddTrack(String track, String sk) throws IOException;
+	public void libraryAddTrack(String track, String sk) throws IOException, WSError;
 
 	/**
 	 * See http://www.lastfm.pl/api/show?service=258
@@ -332,7 +332,7 @@ public interface LastFmServer {
 	 * @return A Tasteometer object
 	 * @throws IOException
 	 */
-	public Tasteometer tasteometerCompare(String user1, String user2, int limit) throws IOException;
+	public Tasteometer tasteometerCompare(String user1, String user2, int limit) throws IOException, WSError;
 
 	/**
 	 * See http://www.lastfm.pl/api/show?service=313
@@ -342,7 +342,7 @@ public interface LastFmServer {
 	 * @return An array of RadioPlayList objects
 	 * @throws IOException
 	 */
-	public RadioPlayList[] getUserPlaylists(String username) throws IOException;
+	public RadioPlayList[] getUserPlaylists(String username) throws IOException, WSError;
 
 	/**
 	 * See http://www.lastfm.pl/api/show?service=290
@@ -354,30 +354,30 @@ public interface LastFmServer {
 	 * @return An Album object
 	 * @throws IOException
 	 */
-	public Album getAlbumInfo(String artist, String album) throws IOException;
+	public Album getAlbumInfo(String artist, String album) throws IOException, WSError;
 
-	public void loveTrack(String artist, String track, String sk) throws IOException;
+	public void loveTrack(String artist, String track, String sk) throws IOException, WSError;
 
-	public void banTrack(String artist, String track, String sk) throws IOException;
+	public void banTrack(String artist, String track, String sk) throws IOException, WSError;
 
-	public void shareTrack(String artist, String track, String recipient, String sk) throws IOException;
+	public void shareTrack(String artist, String track, String recipient, String sk) throws IOException, WSError;
 
-	public void shareArtist(String artist, String recipient, String sk) throws IOException;
+	public void shareArtist(String artist, String recipient, String sk) throws IOException, WSError;
 
-	public void shareEvent(String event, String recipient, String sk) throws IOException;
+	public void shareEvent(String event, String recipient, String sk) throws IOException, WSError;
 
-	public void addTrackToPlaylist(String artist, String track, String playlistId, String sk) throws IOException;
+	public void addTrackToPlaylist(String artist, String track, String playlistId, String sk) throws IOException, WSError;
 
-	public RadioPlayList[] createPlaylist(String title, String description, String sk) throws IOException;
+	public RadioPlayList[] createPlaylist(String title, String description, String sk) throws IOException, WSError;
 
-	public Station[] getUserRecentStations(String user, String sk) throws IOException;
+	public Station[] getUserRecentStations(String user, String sk) throws IOException, WSError;
 	
-	public Station searchForStation(String query) throws IOException;
+	public Station searchForStation(String query) throws IOException, WSError;
 	
-	public Serializable[] multiSearch(String query) throws IOException;
+	public Serializable[] multiSearch(String query) throws IOException, WSError;
 	
-	public void scrobbleTrack(String artist, String track, String album, long timestamp, int duration, String context, String streamid, String sk) throws IOException;
+	public void scrobbleTrack(String artist, String track, String album, long timestamp, int duration, String context, String streamid, String sk) throws IOException, WSError;
 	
-	public void updateNowPlaying(String artist, String track, String album, int duration, String context, String sk) throws IOException;
-	public void removeNowPlaying(String artist, String track, String album, int duration, String context, String sk) throws IOException;
+	public void updateNowPlaying(String artist, String track, String album, int duration, String context, String sk) throws IOException, WSError;
+	public void removeNowPlaying(String artist, String track, String album, int duration, String context, String sk) throws IOException, WSError;
 }

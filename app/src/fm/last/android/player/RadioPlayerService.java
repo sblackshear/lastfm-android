@@ -438,6 +438,8 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.notification);
 		if(mArtwork != null)
 			contentView.setImageViewBitmap(R.id.image, mArtwork);
+		else
+			contentView.setImageViewResource(R.id.image, R.drawable.no_artwork);
 		contentView.setTextViewText(R.id.title, currentTrack.getTitle());
 		contentView.setTextViewText(R.id.text, currentTrack.getCreator());
 		PendingIntent pendingIntent;
@@ -461,12 +463,17 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		notification.contentView = contentView;
 		RadioWidgetProvider.updateAppWidget(this);
 		try {
+			nm.notify(NOTIFY_ID, notification);
+		} catch (java.lang.RuntimeException e) {
+			contentView.setImageViewResource(R.id.image, R.drawable.no_artwork);
+			nm.notify(NOTIFY_ID, notification);
+		}
+		try {
 			Class types[] = { int.class, Notification.class };
 			Object args[] = { NOTIFY_ID, notification };
 			Method method = Service.class.getMethod("startForeground", types);
 			method.invoke(this, args);
 		} catch (NoSuchMethodException e) {
-			nm.notify(NOTIFY_ID, notification);
 			Class types[] = { boolean.class };
 			Object args[] = { true };
 			Method method;
@@ -692,6 +699,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 			p.setAudioStreamType(AudioManager.STREAM_MUSIC);
 			p.setDataSource(url);
 			
+			mArtwork = null;
 			new LoadAlbumArtTask().execute((Void)null);
 			
             registerMediaButtonEventReceiverCompat(mAudioManager, 
@@ -1143,7 +1151,6 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		
 		@Override
 		public void onPreExecute() {
-			mArtwork = BitmapFactory.decodeResource(getResources(), R.drawable.no_artwork);
 			artistName = currentTrack.getCreator();
 			albumName = currentTrack.getAlbum();
 			logger.info("Fetching artwork");
@@ -1232,8 +1239,9 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 				notification.contentView = contentView;
 				try {
 					nm.notify(NOTIFY_ID, notification);
-				} catch(Exception e) {
-					
+				} catch (java.lang.RuntimeException e) {
+					contentView.setImageViewResource(R.id.image, R.drawable.no_artwork);
+					nm.notify(NOTIFY_ID, notification);
 				}
 	            // Update the remote controls
 	            mRemoteControlClientCompat.editMetadata(true)

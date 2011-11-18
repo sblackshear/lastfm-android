@@ -619,6 +619,8 @@ public class Profile_ChartsTab extends ListActivity {
 				return iconifiedEntries;
 			} catch (Exception e) {
 				e.printStackTrace();
+			} catch (WSError e) {
+				LastFMApplication.getInstance().presentError(Profile_ChartsTab.this, e);
 			}
 			return null;
 		}
@@ -668,6 +670,8 @@ public class Profile_ChartsTab extends ListActivity {
 				return iconifiedEntries;
 			} catch (Exception e) {
 				e.printStackTrace();
+			} catch (WSError e) {
+				LastFMApplication.getInstance().presentError(Profile_ChartsTab.this, e);
 			}
 			return null;
 		}
@@ -717,6 +721,8 @@ public class Profile_ChartsTab extends ListActivity {
 				return iconifiedEntries;
 			} catch (Exception e) {
 				e.printStackTrace();
+			} catch (WSError e) {
+				LastFMApplication.getInstance().presentError(Profile_ChartsTab.this, e);
 			}
 			return null;
 		}
@@ -762,10 +768,10 @@ public class Profile_ChartsTab extends ListActivity {
 					iconifiedEntries.add(entry);
 				}
 				return iconifiedEntries;
-			} catch (IOException e) {
-				e.printStackTrace();
 			} catch (Exception e) {
 				e.printStackTrace();
+			} catch (WSError e) {
+				LastFMApplication.getInstance().presentError(Profile_ChartsTab.this, e);
 			}
 			return null;
 		}
@@ -810,6 +816,7 @@ public class Profile_ChartsTab extends ListActivity {
 				return iconifiedEntries;
 			} catch (Exception e) {
 				e.printStackTrace();
+			} catch (WSError e) {
 			}
 			return null;
 		}
@@ -852,6 +859,8 @@ public class Profile_ChartsTab extends ListActivity {
 				return iconifiedEntries;
 			} catch (Exception e) {
 				e.printStackTrace();
+			} catch (WSError e) {
+				LastFMApplication.getInstance().presentError(Profile_ChartsTab.this, e);
 			}
 			return null;
 		}
@@ -898,6 +907,8 @@ public class Profile_ChartsTab extends ListActivity {
 				return iconifiedEntries;
 			} catch (Exception e) {
 				e.printStackTrace();
+			} catch (WSError e) {
+				LastFMApplication.getInstance().presentError(Profile_ChartsTab.this, e);
 			}
 			return null;
 		}

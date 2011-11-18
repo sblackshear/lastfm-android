@@ -156,6 +156,8 @@ public class Profile_RadioTab extends ListActivity {
 				success = true;
 			} catch (Exception e) {
 				e.printStackTrace();
+			} catch (WSError e) {
+				LastFMApplication.getInstance().presentError(Profile_RadioTab.this, e);
 			}
 			return success;
 		}
