@@ -53,4 +53,7 @@ interface IRadioPlayer {
 	
 	boolean getPauseButtonPressed();
 	void pauseButtonPressed();
+	
+	boolean supportsFocus();
+	boolean hasFocus();
 } 

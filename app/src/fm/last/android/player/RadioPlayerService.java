@@ -125,6 +125,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 	private int mTrackPosition = 0;
 	private boolean pauseButtonPressed = false;
 	private boolean focusLost = false;
+	private boolean hasFocus = false;
 	private boolean lostDataConnection = false;
 	private static final int NOTIFY_ID = 1337;
 	private FadeVolumeTask mFadeVolumeTask = null;
@@ -636,8 +637,10 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 					if (wifiLock.isHeld())
 						wifiLock.release();
 					
-			        if (mFocusHelper.isSupported())
+			        if (mFocusHelper.isSupported()) {
 			            mFocusHelper.abandonMusicFocus();
+			            hasFocus = false;
+			        }
 			        
 					stopSelf();
 				} else {
@@ -705,8 +708,10 @@ public class RadioPlayerService extends Service implements MusicFocusable {
             registerMediaButtonEventReceiverCompat(mAudioManager, 
             		new ComponentName(getApplicationContext(), LastFMMediaButtonHandler.class));
 
-	        if (mFocusHelper.isSupported())
+	        if (mFocusHelper.isSupported()) {
 	            mFocusHelper.requestMusicFocus();
+	            hasFocus = true;
+	        }
 
             // Use the remote control APIs (if available) to set the playback state
 
@@ -778,8 +783,10 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		if(currentStation != null)
 			RadioWidgetProvider.updateAppWidget_idle(this, currentStation.getName(), false);
 		
-        if (mFocusHelper.isSupported())
+        if (mFocusHelper.isSupported()) {
             mFocusHelper.abandonMusicFocus();
+            hasFocus = false;
+        }
         if (mRemoteControlClientCompat != null)
             mRemoteControlClientCompat.setPlaybackState(RemoteControlClient.PLAYSTATE_STOPPED);
         
@@ -1328,6 +1335,14 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 	}
 
 	private final IRadioPlayer.Stub mBinder = new IRadioPlayer.Stub() {
+		public boolean supportsFocus() {
+			return mFocusHelper.isSupported();
+		}
+		
+		public boolean hasFocus() {
+			return hasFocus;
+		}
+		
 		public boolean getPauseButtonPressed() throws DeadObjectException {
 			return pauseButtonPressed;
 		}
@@ -1642,6 +1657,8 @@ public class RadioPlayerService extends Service implements MusicFocusable {
     }
 
 	public void focusGained() {
+		hasFocus = true;
+		
 		if (mFadeVolumeTask != null)
 			mFadeVolumeTask.cancel();
 
@@ -1671,6 +1688,8 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 	}
 
 	public void focusLost(boolean isTransient, boolean canDuck) {
+		hasFocus = false;
+		
 		if (mFadeVolumeTask != null)
 			mFadeVolumeTask.cancel();
 

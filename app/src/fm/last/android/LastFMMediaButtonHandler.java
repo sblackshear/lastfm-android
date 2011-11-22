@@ -36,6 +36,12 @@ public class LastFMMediaButtonHandler extends BroadcastReceiver {
 				if(!PreferenceManager.getDefaultSharedPreferences(LastFMApplication.getInstance()).getBoolean("headset_controls", true))
 					return;
 				
+				if(player.supportsFocus() && !player.hasFocus())
+					return;
+				
+				if(!player.supportsFocus() && !player.isPlaying())
+					return;
+				
 				if (intent.getAction().equals("com.smartmadsoft.openwatch.command.BUTTON_FF")) {
 					player.skip();
 				}

@@ -102,7 +102,7 @@ public class CalendarSyncAdapterService extends Service {
 			builder.withValue(Calendars.NAME, "Last.fm Events");
 			builder.withValue(Calendars.CALENDAR_DISPLAY_NAME, "Last.fm Events");
 			builder.withValue(Calendars.CALENDAR_COLOR, 0xD51007);
-			builder.withValue(Calendars.CALENDAR_ACCESS_LEVEL, Calendars.CAL_ACCESS_READ);
+			builder.withValue(Calendars.CALENDAR_ACCESS_LEVEL, Calendars.CAL_ACCESS_RESPOND);
 			builder.withValue(Calendars.OWNER_ACCOUNT, account.name);
 			builder.withValue(Calendars.SYNC_EVENTS, 1);
 			operationList.add(builder.build());
