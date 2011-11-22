@@ -923,6 +923,10 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 				nextSong();
 				e.printStackTrace();
 			}
+	        if (mFocusHelper.isSupported()) {
+	            mFocusHelper.requestMusicFocus();
+	            hasFocus = true;
+	        }
 			mp.setOnCompletionListener(mOnCompletionListener);
 			mp.setOnErrorListener(mOnErrorListener);
 	        if (mRemoteControlClientCompat != null)
@@ -1356,6 +1360,8 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		}
 
 		public void pause() throws DeadObjectException {
+			if(mState == STATE_PAUSED && mp != null)
+				mp.setVolume(1.0f, 1.0f);
 			RadioPlayerService.this.pause();
 		}
 
@@ -1667,6 +1673,8 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 			mFadeVolumeTask = new FadeVolumeTask(FadeVolumeTask.FADE_IN, 5000) {
 				@Override
 				public void onPreExecute() {
+					if(mp != null)
+						mp.setVolume(0.0f, 0.0f);
 					if (mState == STATE_PAUSED)
 						RadioPlayerService.this.pause();
 				}
@@ -1713,6 +1721,8 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 				@Override
 				public void onPostExecute() {
 					RadioPlayerService.this.pause();
+					if(mp != null)
+						mp.setVolume(1.0f, 1.0f); //Resture the volume in case the user un-pauses radio manually
 					mFadeVolumeTask = null;
 				}
 			};
