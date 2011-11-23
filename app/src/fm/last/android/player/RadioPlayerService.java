@@ -1218,7 +1218,10 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		@Override
 		public void onPostExecute(Boolean result) {
 			if(result && currentTrack != null && currentTrack.getAlbum().equals(albumName) && currentTrack.getCreator().equals(artistName)) {
-				mArtwork = art;
+				if(art != null)
+					mArtwork = art;
+				else
+					mArtwork = BitmapFactory.decodeResource(getResources(), R.drawable.no_artwork);
 				Notification notification = new Notification(R.drawable.as_statusbar, getString(R.string.playerservice_streaming_ticker_text, currentTrack.getTitle(),
 						currentTrack.getCreator()), System.currentTimeMillis());
 				PendingIntent contentIntent = PendingIntent.getActivity(RadioPlayerService.this, 0, new Intent(RadioPlayerService.this, Player.class), 0);
@@ -1226,7 +1229,8 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 				notification.setLatestEventInfo(RadioPlayerService.this, currentStation.getName(), info, contentIntent);
 				notification.flags |= Notification.FLAG_ONGOING_EVENT;
 				RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.notification);
-				contentView.setImageViewBitmap(R.id.image, mArtwork);
+				if(mArtwork != null)
+					contentView.setImageViewBitmap(R.id.image, mArtwork);
 				contentView.setTextViewText(R.id.title, currentTrack.getTitle());
 				contentView.setTextViewText(R.id.text, currentTrack.getCreator());
 				PendingIntent pendingIntent;
@@ -1250,7 +1254,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 				notification.contentView = contentView;
 				try {
 					nm.notify(NOTIFY_ID, notification);
-				} catch (java.lang.RuntimeException e) {
+				} catch (Exception e) {
 					contentView.setImageViewResource(R.id.image, R.drawable.no_artwork);
 					nm.notify(NOTIFY_ID, notification);
 				}
