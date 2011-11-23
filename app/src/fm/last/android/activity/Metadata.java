@@ -527,6 +527,60 @@ public class Metadata extends Activity {
 		}
 	}
 
+	/*
+	 * 			
+
+	 */
+	
+	private class ShowEventTask extends AsyncTaskEx<Void, Void, Intent> {
+		Event event;
+		
+		public ShowEventTask(Event e) {
+			event = e;
+		}
+		
+		@Override
+		public void onPreExecute() {
+			mTagList.setAdapter(new NotificationAdapter(Metadata.this, NotificationAdapter.LOAD_MODE, getString(R.string.common_loading)));
+			mTagList.setOnItemClickListener(null);
+		}
+
+		@Override
+		public Intent doInBackground(Void... params) {
+			Intent intent = fm.last.android.activity.Event.intentFromEvent(Metadata.this, event);
+			try {
+				Event[] events = mServer.getUserEvents((LastFMApplication.getInstance().session).getName());
+				for (Event e : events) {
+					if (e.getId() == event.getId()) {
+						intent.putExtra("lastfm.event.status", e.getStatus());
+						break;
+					}
+
+				}
+			} catch (WSError e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			return intent;
+		}
+
+		@Override
+		public void onPostExecute(Intent intent) {
+			mOnEventActivityResult = new EventActivityResult() {
+				public void onEventStatus(int status) {
+					event.setStatus(String.valueOf(status));
+					mOnEventActivityResult = null;
+				}
+			};
+
+			startActivityForResult(intent, 0);
+		}
+	}
+
+	
 	private class LoadTagsTask extends AsyncTaskEx<Void, Void, ArrayList<ListEntry>> {
 
 		@Override
@@ -646,38 +700,8 @@ public class Metadata extends Activity {
 	private OnItemClickListener mEventOnItemClickListener = new OnItemClickListener() {
 
 		public void onItemClick(final AdapterView<?> parent, final View v, final int position, long id) {
-
 			final Event event = (Event) parent.getAdapter().getItem(position);
-
-			Intent intent = fm.last.android.activity.Event.intentFromEvent(Metadata.this, event);
-			try {
-				Event[] events = mServer.getUserEvents((LastFMApplication.getInstance().session).getName());
-				for (Event e : events) {
-					// System.out.printf("Comparing id %d (%s) to %d (%s)\n",e.getId(),e.getTitle(),event.getId(),event.getTitle());
-					if (e.getId() == event.getId()) {
-						// System.out.printf("Matched! Status: %s\n",
-						// e.getStatus());
-						intent.putExtra("lastfm.event.status", e.getStatus());
-						break;
-					}
-
-				}
-			} catch (WSError e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-
-			mOnEventActivityResult = new EventActivityResult() {
-				public void onEventStatus(int status) {
-					event.setStatus(String.valueOf(status));
-					mOnEventActivityResult = null;
-				}
-			};
-
-			startActivityForResult(intent, 0);
+			new ShowEventTask(event).execute((Void)null);
 		}
 
 	};
