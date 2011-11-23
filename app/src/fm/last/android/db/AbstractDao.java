@@ -17,8 +17,6 @@ import android.util.Log;
  */
 public abstract class AbstractDao<T>
 {
-	private Lock mWriteLock = new ReentrantLock();
-	
 	protected AbstractDao() 
 	{
 		dbHelper = LastFmDbHelper.getInstance();
@@ -34,7 +32,7 @@ public abstract class AbstractDao<T>
 	/**
 	 * Remove all rows from the table.
 	 */
-	public void clearTable()
+	public synchronized void clearTable()
 	{
 		removeWithQualification(null);
 		log(Log.DEBUG, "Cleared table "+getTableName());
@@ -55,7 +53,7 @@ public abstract class AbstractDao<T>
 	 * @param qual an optional qualification
 	 * @return a list with the found objects
 	 */
-	protected List<T> loadWithQualification(String qual)
+	protected synchronized List<T> loadWithQualification(String qual)
 	{
 		String query = "SELECT * FROM " + getTableName();
 		if (qual!=null) {
@@ -83,7 +81,7 @@ public abstract class AbstractDao<T>
 		}
 	}
 	
-	protected void close(Cursor c, SQLiteDatabase db)
+	protected synchronized void close(Cursor c, SQLiteDatabase db)
 	{
 		if (c!=null) {
 			c.close();
@@ -97,7 +95,7 @@ public abstract class AbstractDao<T>
 	 * Load all entries of the table.
 	 * @return a list with the entries.
 	 */
-	public List<T> loadAll()
+	public synchronized List<T> loadAll()
 	{
 		return loadWithQualification(null);
 	}
@@ -106,9 +104,8 @@ public abstract class AbstractDao<T>
 	 * Inserts a list of objects as rows into the table.
 	 * @param objects the objects to be inserted.
 	 */
-	public void save(Collection<T> objects)
+	public synchronized void save(Collection<T> objects)
 	{
-		mWriteLock.lock();
 		SQLiteDatabase db = null;
 		ContentValues values = new ContentValues();
 		try {
@@ -124,16 +121,14 @@ public abstract class AbstractDao<T>
 		finally {
 			close(null,db);
 		}
-		mWriteLock.unlock();
 	}
 	
 	/**
 	 * Removes rows from the table.
 	 * @param qual optional qualification
 	 */
-	protected void removeWithQualification(String qual)
+	protected synchronized void removeWithQualification(String qual)
 	{
-		mWriteLock.lock();
 		String query = "DELETE FROM " + getTableName();
 		if (qual!=null) {
 			query += " " + qual;
@@ -147,12 +142,10 @@ public abstract class AbstractDao<T>
 		finally {
 			close(null,db);
 		}
-		mWriteLock.unlock();
 	}
 	
-	protected int countWithQualification(String qual)
+	protected synchronized int countWithQualification(String qual)
 	{
-		mWriteLock.lock();
 		String query = "SELECT count(*) FROM " + getTableName();
 		if (qual!=null) {
 			query += " " + qual;
@@ -172,7 +165,6 @@ public abstract class AbstractDao<T>
 		finally {
 			close(c,db);
 		}
-		mWriteLock.unlock();
 		return 0;
 	}
 	

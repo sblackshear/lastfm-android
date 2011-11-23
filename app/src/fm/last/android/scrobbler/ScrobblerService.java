@@ -621,6 +621,7 @@ public class ScrobblerService extends Service {
 					try {
 						queueSize = ScrobblerQueueDao.getInstance().getQueueSize();
 					} catch (Exception e) {
+						e.printStackTrace();
 					}
 					if (queueSize > 0 && mSubmissionTask == null) {
 						mSubmissionTask = new SubmitTracksTask();
