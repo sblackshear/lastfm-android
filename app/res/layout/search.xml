@@ -19,15 +19,16 @@
         android:layout_marginBottom="3dip"
         android:layout_marginTop="4dip"/>	
         
-	<ImageButton 
-		android:id="@+id/search"
-		android:layout_height="fill_parent" android:layout_width="wrap_content"
-		android:layout_marginLeft="8dip"
-		android:layout_marginBottom="9dip"
-		android:layout_marginRight="8dip"
-		android:layout_marginTop="7dip"
-		android:background="@drawable/black_button"
-		android:src="@drawable/ic_tab_search"/>
+	<ImageButton
+	    android:id="@+id/search"
+	    android:layout_width="wrap_content"
+	    android:layout_height="fill_parent"
+	    android:layout_marginBottom="9dip"
+	    android:layout_marginLeft="8dip"
+	    android:layout_marginRight="8dip"
+	    android:layout_marginTop="7dip"
+	    android:background="@drawable/black_button"
+	    android:src="@drawable/search_light" />
 
 	<ImageButton 
 		android:id="@+id/voice"
