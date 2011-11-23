@@ -130,7 +130,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 	private static final int NOTIFY_ID = 1337;
 	private FadeVolumeTask mFadeVolumeTask = null;
     RemoteControlClientCompat mRemoteControlClientCompat;
-    private Bitmap mArtwork;
+    private Bitmap mArtwork = null;
     
     private StreamProxy proxy;
 
@@ -435,6 +435,8 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.notification);
 		if(art != null)
 			contentView.setImageViewBitmap(R.id.image, mArtwork);
+		else
+			contentView.setImageViewResource(R.id.image, R.drawable.no_artwork);
 		contentView.setTextViewText(R.id.title, currentTrack.getTitle());
 		contentView.setTextViewText(R.id.text, currentTrack.getCreator());
 		PendingIntent pendingIntent;
