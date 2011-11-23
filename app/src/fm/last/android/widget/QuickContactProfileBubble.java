@@ -58,7 +58,11 @@ public class QuickContactProfileBubble extends ProfileBubble {
 	private void setQuickContactId(long id) {
 		mBadge.setExcludeMimes(new String[] {"vnd.android.cursor.item/vnd.fm.last.android.profile"});
 		mBadge.assignContactUri(ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, id));
-		Bitmap avatar = BitmapFactory.decodeStream(ContactsContract.Contacts.openContactPhotoInputStream(getContext().getContentResolver(), ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, id)));
+		Bitmap avatar = null;
+		try {
+			avatar = BitmapFactory.decodeStream(ContactsContract.Contacts.openContactPhotoInputStream(getContext().getContentResolver(), ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, id)));
+		} catch (Exception e) {
+		}
 		if(avatar != null) {
 			mBadge.setImageBitmap(avatar);
 		} else if(mUser.getImages().length > 0) {

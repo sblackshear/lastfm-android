@@ -3,6 +3,8 @@ package fm.last.android.db;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -15,6 +17,7 @@ import android.util.Log;
  */
 public abstract class AbstractDao<T>
 {
+	private Lock mWriteLock = new ReentrantLock();
 	
 	protected AbstractDao() 
 	{
@@ -105,10 +108,11 @@ public abstract class AbstractDao<T>
 	 */
 	public void save(Collection<T> objects)
 	{
+		mWriteLock.lock();
 		SQLiteDatabase db = null;
 		ContentValues values = new ContentValues();
 		try {
-			db =  dbHelper.getWritableDatabase();;
+			db =  dbHelper.getWritableDatabase();
 			for (T newObject : objects) {
 				if (newObject==null) continue;
 				values.clear();
@@ -120,6 +124,7 @@ public abstract class AbstractDao<T>
 		finally {
 			close(null,db);
 		}
+		mWriteLock.unlock();
 	}
 	
 	/**
@@ -127,7 +132,8 @@ public abstract class AbstractDao<T>
 	 * @param qual optional qualification
 	 */
 	protected void removeWithQualification(String qual)
-	{		
+	{
+		mWriteLock.lock();
 		String query = "DELETE FROM " + getTableName();
 		if (qual!=null) {
 			query += " " + qual;
@@ -141,10 +147,12 @@ public abstract class AbstractDao<T>
 		finally {
 			close(null,db);
 		}
+		mWriteLock.unlock();
 	}
 	
 	protected int countWithQualification(String qual)
-	{		
+	{
+		mWriteLock.lock();
 		String query = "SELECT count(*) FROM " + getTableName();
 		if (qual!=null) {
 			query += " " + qual;
@@ -153,7 +161,7 @@ public abstract class AbstractDao<T>
 		SQLiteDatabase db = null;
 		Cursor c = null;
 		try {
-			db = dbHelper.getWritableDatabase();
+			db = dbHelper.getReadableDatabase();
 			c = db.rawQuery(query,null);
 			if (c.moveToFirst()) {
 				int count = c.getInt(0);
@@ -164,6 +172,7 @@ public abstract class AbstractDao<T>
 		finally {
 			close(c,db);
 		}
+		mWriteLock.unlock();
 		return 0;
 	}
 	

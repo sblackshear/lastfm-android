@@ -253,9 +253,14 @@ public class Profile_RadioTab extends ListActivity {
 		if (!isAuthenticatedUser)
 			return;
 		SharedPreferences settings = getSharedPreferences(LastFm.PREFS, 0);
-		mMyRecentAdapter.resetList();
-		List<Station> stations = RecentStationsDao.getInstance().getRecentStations();
+		List<Station> stations = null;
+		try {
+			stations = RecentStationsDao.getInstance().getRecentStations();
+		} catch (Exception e) {
+			
+		}
 		if (stations != null) {
+			mMyRecentAdapter.resetList();
 			for (Station station : stations) {
 				String name = station.getName();
 				String url = station.getUrl();

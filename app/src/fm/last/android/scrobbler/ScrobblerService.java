@@ -232,6 +232,11 @@ public class ScrobblerService extends Service {
 	public void onStart(Intent intent, int startId) {
 		final Intent i = intent;
 		
+		if(i==null) {
+			stopSelf();
+			return;
+		}
+		
 		/*
 		 * The Android media player doesn't send a META_CHANGED notification for
 		 * the first track, so we'll have to catch PLAYBACK_STATE_CHANGED and
@@ -502,6 +507,11 @@ public class ScrobblerService extends Service {
 	}
 	
 	public void handleIntent(Intent intent) {
+		if(intent == null || intent.getAction() == null) {
+			stopSelf();
+			return;
+		}
+		
 		if (intent.getAction().equals(META_CHANGED)) {
 			long startTime = System.currentTimeMillis() / 1000;
 			long position = intent.getLongExtra("position", 0) / 1000;
@@ -607,7 +617,11 @@ public class ScrobblerService extends Service {
 			if(ni != null) {
 				boolean scrobbleWifiOnly = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("scrobble_wifi_only", false);
 				if (cm.getBackgroundDataSetting() && ni.isConnected() && (!scrobbleWifiOnly || (scrobbleWifiOnly && ni.getType() == ConnectivityManager.TYPE_WIFI))) {
-					int queueSize = ScrobblerQueueDao.getInstance().getQueueSize();
+					int queueSize = 0;
+					try {
+						queueSize = ScrobblerQueueDao.getInstance().getQueueSize();
+					} catch (Exception e) {
+					}
 					if (queueSize > 0 && mSubmissionTask == null) {
 						mSubmissionTask = new SubmitTracksTask();
 						mSubmissionTask.execute();

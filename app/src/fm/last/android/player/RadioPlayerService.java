@@ -923,12 +923,14 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 				nextSong();
 				e.printStackTrace();
 			}
-	        if (mFocusHelper.isSupported()) {
+	        if (mFocusHelper != null && mFocusHelper.isSupported()) {
 	            mFocusHelper.requestMusicFocus();
 	            hasFocus = true;
 	        }
-			mp.setOnCompletionListener(mOnCompletionListener);
-			mp.setOnErrorListener(mOnErrorListener);
+	        if(mp != null) {
+				mp.setOnCompletionListener(mOnCompletionListener);
+				mp.setOnErrorListener(mOnErrorListener);
+	        }
 	        if (mRemoteControlClientCompat != null)
 	            mRemoteControlClientCompat.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING);
 			if (getFileStreamPath("player.dat").exists())

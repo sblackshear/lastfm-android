@@ -22,8 +22,8 @@ import fm.last.util.UrlUtil;
 public class AlbumArt extends ImageView {
 
 	private FetchArtTask _fetchTask;
-	private Bitmap _defaultImage;
 	private Bitmap _bitmap;
+	private int _defaultResource;
 
 	public AlbumArt(Context context, AttributeSet attributeSet) {
 		super(context, attributeSet);
@@ -42,7 +42,7 @@ public class AlbumArt extends ImageView {
 	}
 
 	public void clear() {
-		setImageBitmap(_defaultImage);
+		setImageResource(_defaultResource);
 	}
 
 	public void cancel() {
@@ -51,12 +51,12 @@ public class AlbumArt extends ImageView {
 	}
 
 	public void setDefaultImageResource(int res) {
-		_defaultImage = BitmapFactory.decodeResource(getResources(), res);
-		setImageBitmap(_defaultImage);
+		_defaultResource = res;
+		setImageResource(_defaultResource);
 	}
 
 	public void fetch(String URL) {
-		setImageBitmap(_defaultImage);
+		setImageResource(_defaultResource);
 
 		if (_fetchTask != null)
 			_fetchTask.cancel(true);

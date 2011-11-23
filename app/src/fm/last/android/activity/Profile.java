@@ -24,9 +24,11 @@ import java.io.File;
 import java.util.List;
 
 import android.app.ActivityGroup;
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -117,12 +119,24 @@ public class Profile extends ActivityGroup {
 		} else {
 			username = getIntent().getStringExtra("lastfm.profile.username");
 		}
-		
+
 		if (username == null) {
 			username = session.getName();
 			isAuthenticatedUser = true;
 		} else
 			isAuthenticatedUser = false;
+
+		if(intent.getStringExtra("ERROR_TITLE") != null) {
+			AlertDialog.Builder d = new AlertDialog.Builder(this);
+			d.setTitle(intent.getStringExtra("ERROR_TITLE"));
+			d.setMessage(intent.getStringExtra("ERROR_DESCRIPTION"));
+			d.setIcon(android.R.drawable.ic_dialog_alert);
+			d.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+				}
+			});
+			d.show();
+		}
 
 		mTabHost = (TabHost)findViewById(R.id.TabBar);
 		mTabHost.setup(getLocalActivityManager());

@@ -79,7 +79,9 @@ final class LastFmServerImpl implements LastFmServer {
 			}
 
 			Node lfmNode = XMLUtil.findNamedElementNode(responseXML, "lfm");
-			String status = lfmNode.getAttributes().getNamedItem("status").getNodeValue();
+			String status = "";
+			if(lfmNode != null && lfmNode.getAttributes() != null && lfmNode.getAttributes().getNamedItem("status") != null)
+				status = lfmNode.getAttributes().getNamedItem("status").getNodeValue();
 			if (!status.contains("ok")) {
 				Node errorNode = XMLUtil.findNamedElementNode(lfmNode, "error");
 				if (errorNode != null) {
@@ -89,8 +91,10 @@ final class LastFmServerImpl implements LastFmServer {
 				return null;
 			} else {
 				Node itemNode = XMLUtil.findNamedElementNode(lfmNode, nodeName);
-
-				return (T)builder.build(itemNode);
+				if(itemNode != null)
+					return (T)builder.build(itemNode);
+				else
+					return null;
 			}
 		}
 

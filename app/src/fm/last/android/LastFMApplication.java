@@ -43,6 +43,7 @@ import android.util.Log;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
 import fm.last.android.activity.Player;
+import fm.last.android.activity.Profile;
 import fm.last.android.db.LastFmDbHelper;
 import fm.last.android.player.IRadioPlayer;
 import fm.last.android.player.RadioPlayerService;
@@ -364,7 +365,7 @@ public class LastFMApplication extends Application {
 		try {
 			d.show();
 		} catch (Exception e) {
-			Intent intent = new Intent(LastFMApplication.this, Player.class);
+			Intent intent = new Intent(LastFMApplication.this, Profile.class);
 			intent.putExtra("ERROR_TITLE", title);
 			intent.putExtra("ERROR_DESCRIPTION", description);
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

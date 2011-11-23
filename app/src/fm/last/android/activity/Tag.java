@@ -437,7 +437,7 @@ public class Tag extends Activity {
 	 * @return true if successful
 	 */
 	private boolean addTag(String tag) {
-		if (!isValidTag(tag))
+		if (tag == null || mTrackNewTags == null || !isValidTag(tag))
 			return false;
 
 		for (int i = 0; i < mTrackNewTags.size(); i++) {

@@ -204,17 +204,6 @@ public class Player extends Activity {
 			} else if(intent.getData() != null && intent.getData().getScheme() != null && intent.getData().getScheme().equals("lastfm")) {
 				LastFMApplication.getInstance().playRadioStation(Player.this, intent.getData().toString(), false);
 				tuning = true;
-			} else if(intent.getStringExtra("ERROR_TITLE") != null) {
-				AlertDialog.Builder d = new AlertDialog.Builder(this);
-				d.setTitle(intent.getStringExtra("ERROR_TITLE"));
-				d.setMessage(intent.getStringExtra("ERROR_DESCRIPTION"));
-				d.setIcon(android.R.drawable.ic_dialog_alert);
-				d.setNeutralButton("OK", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-					}
-				});
-				d.show();
-				tuning = true;
 			}
 		}
 		if (icicle != null) {
@@ -666,11 +655,14 @@ public class Player extends Activity {
 							String[] trackContext = player.getContext();
 							String stationURL = player.getStationUrl();
 							loved = player.getLoved();
-							if(player.getArtwork() != null)
-								mAlbum.setImageBitmap(player.getArtwork());
-							else
+							try {
+								if(player.getArtwork() != null)
+									mAlbum.setImageBitmap(player.getArtwork());
+								else
+									mAlbum.setImageResource(R.drawable.no_artwork);
+							} catch (java.lang.OutOfMemoryError e) {
 								mAlbum.setImageResource(R.drawable.no_artwork);
-							
+							}
 							if (loved) {
 								mLoveButton.setImageResource(R.drawable.loved);
 							} else {
@@ -691,7 +683,7 @@ public class Player extends Activity {
 								} else {
 									mTrackName.setText(trackName);
 								}
-								if (trackContext == null || trackContext.length == 0) {
+								if (trackContext == null || trackContext.length == 0 || trackContext[0] == null || stationURL == null) {
 									mTrackContext.setVisibility(View.GONE);
 									mTrackContext.setText("");
 								} else {
