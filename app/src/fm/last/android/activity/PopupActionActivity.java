@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -24,8 +25,10 @@ import fm.last.android.R;
 import fm.last.android.adapter.ListAdapter;
 import fm.last.android.adapter.ListEntry;
 import fm.last.android.player.RadioPlayerService;
+import fm.last.android.utils.AsyncTaskEx;
 import fm.last.android.utils.ImageCache;
 import fm.last.api.LastFmServer;
+import fm.last.api.WSError;
 
 /**
  * @author sam
@@ -153,21 +156,13 @@ public class PopupActionActivity extends ListActivity {
 			startActivity(intent);
 			break;
 		case R.drawable.loved:
-			try {
-				LastFmServer server = AndroidLastFmServerFactory.getServer();
-				server.loveTrack(mArtistName, mTrackName, LastFMApplication.getInstance().session.getKey());
-				Toast.makeText(LastFMApplication.getInstance(), getString(R.string.scrobbler_trackloved), Toast.LENGTH_SHORT).show();
-			} catch (Exception e) {
-			}
-			break;
+			((ListAdapter)getListAdapter()).enableLoadBar(position);
+			new LoveTrackTask().execute((Void)null);
+			return;
 		case R.drawable.ban:
-			try {
-				LastFmServer server = AndroidLastFmServerFactory.getServer();
-				server.banTrack(mArtistName, mTrackName, LastFMApplication.getInstance().session.getKey());
-				Toast.makeText(LastFMApplication.getInstance(), getString(R.string.scrobbler_trackbanned), Toast.LENGTH_SHORT).show();
-			} catch (Exception e) {
-			}
-			break;
+			((ListAdapter)getListAdapter()).enableLoadBar(position);
+			new BanTrackTask().execute((Void)null);
+			return;
 		case R.drawable.shopping_cart_dark:
 			if(getIntent().getBooleanExtra("lastfm.nowplaying", false)) {
 				try {
@@ -198,5 +193,67 @@ public class PopupActionActivity extends ListActivity {
 			break;
 		}
 		finish();
+	}
+	
+	private class LoveTrackTask extends AsyncTask<Void, Void, Boolean> {
+		WSError error;
+
+		@Override
+		protected Boolean doInBackground(Void... arg0) {
+			try {
+				LastFmServer server = AndroidLastFmServerFactory.getServer();
+				server.loveTrack(mArtistName, mTrackName, LastFMApplication.getInstance().session.getKey());
+				return true;
+			} catch (Exception e) {
+			} catch (WSError e) {
+				error = e;
+			}
+			return false;
+		}
+		
+		@Override
+		public void onPostExecute(Boolean result) {
+			((ListAdapter)getListAdapter()).disableLoadBar();
+			if(result) {
+				Toast.makeText(LastFMApplication.getInstance(), getString(R.string.scrobbler_trackloved), Toast.LENGTH_SHORT).show();
+				finish();
+			} else {
+				if(error != null)
+					LastFMApplication.getInstance().presentError(PopupActionActivity.this, error);
+				else
+					Toast.makeText(LastFMApplication.getInstance(), getString(R.string.ERROR_SERVER_UNAVAILABLE_TITLE), Toast.LENGTH_SHORT).show();
+			}
+		}
+	}
+	
+	private class BanTrackTask extends AsyncTask<Void, Void, Boolean> {
+		WSError error;
+
+		@Override
+		protected Boolean doInBackground(Void... arg0) {
+			try {
+				LastFmServer server = AndroidLastFmServerFactory.getServer();
+				server.banTrack(mArtistName, mTrackName, LastFMApplication.getInstance().session.getKey());
+				return true;
+			} catch (Exception e) {
+			} catch (WSError e) {
+				error = e;
+			}
+			return false;
+		}
+		
+		@Override
+		public void onPostExecute(Boolean result) {
+			((ListAdapter)getListAdapter()).disableLoadBar();
+			if(result) {
+				Toast.makeText(LastFMApplication.getInstance(), getString(R.string.scrobbler_trackbanned), Toast.LENGTH_SHORT).show();
+				finish();
+			} else {
+				if(error != null)
+					LastFMApplication.getInstance().presentError(PopupActionActivity.this, error);
+				else
+					Toast.makeText(LastFMApplication.getInstance(), getString(R.string.ERROR_SERVER_UNAVAILABLE_TITLE), Toast.LENGTH_SHORT).show();
+			}
+		}
 	}
 }
