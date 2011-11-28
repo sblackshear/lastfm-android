@@ -194,7 +194,10 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Last.fm Player");
 
 		WifiManager wm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-		wifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL, "Last.fm Player");
+		if(Integer.decode(Build.VERSION.SDK) > 8)
+			wifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "Last.fm Player");
+		else
+			wifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL, "Last.fm Player");
 
 		mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 		
