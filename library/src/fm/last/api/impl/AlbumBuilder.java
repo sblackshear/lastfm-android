@@ -38,30 +38,24 @@ public class AlbumBuilder extends XMLBuilder<Album> {
 	@Override
 	public Album build(Node albumNode) {
 		node = albumNode;
-		String artist = getText("artist");
-		String title = getText("title");
-		String mbid = getText("mbid");
-		String url = getText("url");
-
-		List<Node> imageNodes = getChildNodes("image");
-		if (imageNodes.size() > 1)
-			imageNodes.remove(0); // remove smallest size if there is one
-		ImageUrl[] images = new ImageUrl[imageNodes.size()];
-		int i = 0;
-		for (Node imageNode : imageNodes)
-			images[i++] = imageBuilder.build(imageNode);
-
-		return new Album(artist, title, mbid, url, images);
-	}
-
-	public Album buildFromTopList(Node albumNode) {
-		node = albumNode;
 		Node artistNode = getChildNode("artist");
-		String artist = XMLUtil.getChildContents(artistNode, "name");
-		String title = getText("name");
-		String mbid = getText("mbid");
-		String url = getText("url");
-
+		String artist = "";
+		String title = "";
+		String mbid = "";
+		String url = "";
+		
+		if(artistNode != null) {
+			artist = XMLUtil.getChildContents(artistNode, "name");
+			title = getText("name");
+			mbid = getText("mbid");
+			url = getText("url");
+		} else {
+			artist = getText("artist");
+			title = getText("title");
+			mbid = getText("mbid");
+			url = getText("url");
+		}
+		
 		List<Node> imageNodes = getChildNodes("image");
 		if (imageNodes.size() > 1)
 			imageNodes.remove(0); // remove smallest size if there is one
