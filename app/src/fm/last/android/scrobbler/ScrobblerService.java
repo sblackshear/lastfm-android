@@ -119,7 +119,7 @@ public class ScrobblerService extends Service {
 				handler.setFormatter(new SimpleFormatter());
 				logger.addHandler(handler);
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -179,12 +179,19 @@ public class ScrobblerService extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 
+		int queueSize = 0;
+		try {
+			queueSize = ScrobblerQueueDao.getInstance().getQueueSize();
+		} catch (Exception e) { //If the db was locked, assume we should try again in an hour
+			queueSize = 1;
+		}
+		
 		try {
 			Intent intent = new Intent("fm.last.android.scrobbler.FLUSH");
 			PendingIntent alarmIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
 			AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 			am.cancel(alarmIntent); // cancel any pending alarm intents
-			if (ScrobblerQueueDao.getInstance().getQueueSize() > 0) {
+			if (queueSize > 0) {
 				// schedule an alarm to wake the device and try again in an hour
 				logger.info("Scrobbles are pending, will retry in an hour");
 				am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 3600000, alarmIntent);
@@ -710,9 +717,12 @@ public class ScrobblerService extends Service {
 		@Override
 		public void onPreExecute() {
 			/* If we have any scrobbles in the queue, try to send them now */
-			if (mSubmissionTask == null && ScrobblerQueueDao.getInstance().getQueueSize() > 0) {
-				mSubmissionTask = new SubmitTracksTask();
-				mSubmissionTask.execute();
+			try {
+				if (mSubmissionTask == null && ScrobblerQueueDao.getInstance().getQueueSize() > 0) {
+					mSubmissionTask = new SubmitTracksTask();
+					mSubmissionTask.execute();
+				}
+			} catch (Exception e) { //The scrobbler db might be locked, this isn't fatal as we can retry later
 			}
 		}
 

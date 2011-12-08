@@ -548,21 +548,25 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 	private OnCompletionListener mOnCompletionListener = new OnCompletionListener() {
 
 		public void onCompletion(MediaPlayer p) {
-			if(lostDataConnection && bufferPercent < 99) {
-				logger.info("Track ran out of data, pausing");
-				pause();
-				mp.release();
-				mp = null;
-				ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-				NetworkInfo activeni = cm.getActiveNetworkInfo();
-				if(activeni != null && activeni.isConnected()) {
-					logger.info("Another data connection is available, attempting to resume");
+			if(p == mp) {
+				if(lostDataConnection && bufferPercent < 99) {
+					logger.info("Track ran out of data, pausing");
 					pause();
-					lostDataConnection = false;
+					mp.release();
+					mp = null;
+					ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+					if(cm != null) {
+						NetworkInfo activeni = cm.getActiveNetworkInfo();
+						if(activeni != null && activeni.isConnected()) {
+							logger.info("Another data connection is available, attempting to resume");
+							pause();
+							lostDataConnection = false;
+						}
+					}
+				} else {
+					logger.info("Track completed normally (bye, laurie!)");
+					new NextTrackTask().execute((Void) null);
 				}
-			} else {
-				logger.info("Track completed normally (bye, laurie!)");
-				new NextTrackTask().execute((Void) null);
 			}
 		}
 	};
@@ -708,6 +712,11 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 				}
 				url = String.format("http://127.0.0.1:%d/%s",proxy.getPort(), url);
 			}
+			if(!wifiLock.isHeld())
+				wifiLock.acquire();
+			if(!wakeLock.isHeld())
+				wakeLock.acquire();
+
 			logger.info("Streaming: " + url);
 			p.reset();
 			p.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
@@ -916,8 +925,10 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 			ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 			NetworkInfo ni = cm.getActiveNetworkInfo();
 			mDoHasWiFi = (ni == null || ni.getType() == ConnectivityManager.TYPE_WIFI);
-			wifiLock.acquire();
-			wakeLock.acquire();
+			if(!wifiLock.isHeld())
+				wifiLock.acquire();
+			if(!wakeLock.isHeld())
+				wakeLock.acquire();
 			playingNotify();
 			notifyChange(ScrobblerService.META_CHANGED);
 			try {
@@ -1075,8 +1086,10 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 			throw new WSError("radio.tune", "Last.fm radio is unavailable in this region", WSError.ERROR_RadioUnavailable);
 		}
 		
-		wakeLock.acquire();
-		wifiLock.acquire();
+		if(!wakeLock.isHeld())
+			wakeLock.acquire();
+		if(!wifiLock.isHeld())
+			wifiLock.acquire();
 
 		currentStationURL = url;
 
@@ -1191,11 +1204,14 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 			Album album = null;
 			boolean success = false;
 
+			if(currentTrack == null)
+				return false;
+			
 			artUrl = currentTrack.getImageUrl();
 
 			try {
 				LastFmServer server = AndroidLastFmServerFactory.getServer();
-				if (!artistName.equals(RadioPlayerService.UNKNOWN) && albumName != null && albumName.length() > 0) {
+				if (artistName != null && !artistName.equals(RadioPlayerService.UNKNOWN) && albumName != null && albumName.length() > 0) {
 					album = server.getAlbumInfo(artistName, albumName);
 					if (album != null) {
 						DisplayMetrics metrics = new DisplayMetrics();
@@ -1235,7 +1251,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 
 		@Override
 		public void onPostExecute(Boolean result) {
-			if(result && currentTrack != null && currentTrack.getAlbum().equals(albumName) && currentTrack.getCreator().equals(artistName)) {
+			if(result && currentTrack != null && currentStation != null && currentTrack.getAlbum().equals(albumName) && currentTrack.getCreator().equals(artistName)) {
 				if(art != null)
 					mArtwork = art;
 				else
