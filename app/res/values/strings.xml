@@ -196,7 +196,8 @@
 	<string name="event_attending">I\'m attending</string>
 	<string name="event_notattending">I\'m not attending</string>
 	<string name="event_maybe">I might attend</string>
-
+	<string name="event_saving">Saving Event</string>
+	
 	<!-- Player activity -->
 	<string name="player_label">Last.fm: Player</string>
 	<string name="player_tuning">Tuning</string>

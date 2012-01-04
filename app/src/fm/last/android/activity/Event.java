@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -37,6 +38,7 @@ import android.widget.TextView;
 import fm.last.android.AndroidLastFmServerFactory;
 import fm.last.android.LastFMApplication;
 import fm.last.android.R;
+import fm.last.android.utils.AsyncTaskEx;
 import fm.last.android.widget.AlbumArt;
 import fm.last.api.ImageUrl;
 import fm.last.api.LastFmServer;
@@ -162,19 +164,7 @@ public class Event extends Activity {
 
 		findViewById(R.id.ok).setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				LastFmServer server = AndroidLastFmServerFactory.getServer();
-
-				try {
-					int status = resourceToStatus(mAttendance.getCheckedRadioButtonId());
-					server.attendEvent(getIntent().getStringExtra("lastfm.event.id"), String.valueOf(status), (LastFMApplication.getInstance().session)
-							.getKey());
-					setResult(RESULT_OK, new Intent().putExtra("status", status));
-					finish();
-				} catch (WSError e) {
-					LastFMApplication.getInstance().presentError(Event.this, e);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				new SaveEventTask().execute((Void)null);
 			}
 		});
 	}
@@ -220,5 +210,54 @@ public class Event extends Activity {
 		intent.putExtra("lastfm.event.status", event.getStatus());
 		intent.putExtra("lastfm.event.ticketurls", (Serializable)event.getTicketUrls());
 		return intent;
+	}
+	
+	private class SaveEventTask extends AsyncTaskEx<Void, Void, Boolean> {
+		ProgressDialog mLoadDialog = null;
+		WSError mError = null;
+
+		@Override
+		public void onPreExecute() {
+			if (mLoadDialog == null) {
+				mLoadDialog = ProgressDialog.show(Event.this, "", getString(R.string.event_saving), true, false);
+				mLoadDialog.setCancelable(true);
+			}
+		}
+
+		@Override
+		public Boolean doInBackground(Void... params) {
+			LastFmServer server = AndroidLastFmServerFactory.getServer();
+
+			try {
+				int status = resourceToStatus(mAttendance.getCheckedRadioButtonId());
+				server.attendEvent(getIntent().getStringExtra("lastfm.event.id"), String.valueOf(status), (LastFMApplication.getInstance().session)
+						.getKey());
+				setResult(RESULT_OK, new Intent().putExtra("status", status));
+				return true;
+			} catch (WSError e) {
+				mError = e;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return false;
+		}
+
+		@Override
+		public void onPostExecute(Boolean result) {
+			try {
+				if (mLoadDialog != null) {
+					mLoadDialog.dismiss();
+					mLoadDialog = null;
+				}
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			}
+			if(result) {
+				finish();
+			} else {
+				if(mError != null)
+					LastFMApplication.getInstance().presentError(Event.this, mError);
+			}
+		}
 	}
 }
