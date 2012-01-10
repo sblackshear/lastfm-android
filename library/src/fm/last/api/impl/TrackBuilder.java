@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.w3c.dom.Node;
 
+import fm.last.api.Album;
 import fm.last.api.Artist;
 import fm.last.api.ImageUrl;
 import fm.last.api.Track;
@@ -58,13 +59,21 @@ public class TrackBuilder extends XMLBuilder<Track> {
 			artist = new Artist(artistName, "", "", "", null, "", "", "", "");
 		}
 
-		List<Node> imageNodes = getChildNodes("image");
-		ImageUrl[] images = new ImageUrl[imageNodes.size()];
-		int i = 0;
-		for (Node imageNode : imageNodes) {
-			images[i++] = imageBuilder.build(imageNode);
+		List<Node> imageNodes;
+		ImageUrl[] images;
+
+		Node albumNode = getChildNode("album");
+		if(albumNode != null) {
+			Album album = new AlbumBuilder().build(albumNode);
+			images = album.getImages();
+		} else {
+			imageNodes = getChildNodes("image");
+			images = new ImageUrl[imageNodes.size()];
+			int i = 0;
+			for (Node imageNode : imageNodes) {
+				images[i++] = imageBuilder.build(imageNode);
+			}
 		}
-		
 		if(getChildNode("date") != null)
 			node = getChildNode("date");
 		String date = getAttribute("uts");
