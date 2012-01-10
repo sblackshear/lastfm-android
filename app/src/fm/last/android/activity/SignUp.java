@@ -88,7 +88,7 @@ public class SignUp extends Activity {
 
 		@Override
 		public Boolean doInBackground(Void... params) {
-			LastFmServer server = AndroidLastFmServerFactory.getServer();
+			LastFmServer server = AndroidLastFmServerFactory.getSecureServer();
 
 			try {
 				String username = mUsername.getText().toString();
