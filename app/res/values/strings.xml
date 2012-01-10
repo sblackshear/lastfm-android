@@ -46,6 +46,7 @@
 	<string name="signup_username">Username</string>
 	<string name="signup_password">Password</string>
 	<string name="signup_email">Your email</string>
+	<string name="signup_saving">Creating Your Account</string>
 
 	<!-- Tag activity -->
 	<string name="tag_label">Last.fm: Tag</string>

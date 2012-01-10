@@ -21,6 +21,7 @@
 package fm.last.android.activity;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -31,6 +32,7 @@ import android.widget.TextView;
 import fm.last.android.AndroidLastFmServerFactory;
 import fm.last.android.LastFMApplication;
 import fm.last.android.R;
+import fm.last.android.utils.AsyncTaskEx;
 import fm.last.api.LastFmServer;
 import fm.last.api.Session;
 import fm.last.api.WSError;
@@ -44,34 +46,7 @@ public class SignUp extends Activity {
 
 	protected OnClickListener mOnSignUpClickListener = new OnClickListener() {
 		public void onClick(View v) {
-			LastFmServer server = AndroidLastFmServerFactory.getSecureServer();
-			try {
-				String username = mUsername.getText().toString();
-				String password = mPassword.getText().toString();
-				String email = mEmail.getText().toString();
-
-				server.signUp(username, password, email);
-
-				try {
-					LastFMApplication.getInstance().tracker.trackEvent("Clicks", // Category
-							"signup", // Action
-							"", // Label
-							0); // Value
-				} catch (Exception e) {
-					//Google Analytics doesn't appear to be thread safe
-				}
-
-				setResult(RESULT_OK, new Intent().putExtra("username", username).putExtra("password", password));
-				finish();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				LastFMApplication app = (LastFMApplication) getApplication();
-				app.presentError(SignUp.this, new WSError(e.getClass().getSimpleName(), e.getMessage(), -1));
-			} catch (WSError e) {
-				LastFMApplication app = (LastFMApplication) getApplication();
-				app.presentError(SignUp.this, e);
-			}
+			new SignUpTask().execute((Void)null);
 		}
 	};
 
@@ -96,6 +71,68 @@ public class SignUp extends Activity {
 			LastFMApplication.getInstance().tracker.trackPageView("/SignUp");
 		} catch (Exception e) {
 			//Google Analytics doesn't appear to be thread safe
+		}
+	}
+	
+	private class SignUpTask extends AsyncTaskEx<Void, Void, Boolean> {
+		ProgressDialog mLoadDialog = null;
+		WSError mError = null;
+
+		@Override
+		public void onPreExecute() {
+			if (mLoadDialog == null) {
+				mLoadDialog = ProgressDialog.show(SignUp.this, "", getString(R.string.signup_saving), true, false);
+				mLoadDialog.setCancelable(true);
+			}
+		}
+
+		@Override
+		public Boolean doInBackground(Void... params) {
+			LastFmServer server = AndroidLastFmServerFactory.getServer();
+
+			try {
+				String username = mUsername.getText().toString();
+				String password = mPassword.getText().toString();
+				String email = mEmail.getText().toString();
+
+				server.signUp(username, password, email);
+
+				try {
+					LastFMApplication.getInstance().tracker.trackEvent("Clicks", // Category
+							"signup", // Action
+							"", // Label
+							0); // Value
+				} catch (Exception e) {
+					//Google Analytics doesn't appear to be thread safe
+				}
+
+				setResult(RESULT_OK, new Intent().putExtra("username", username).putExtra("password", password));
+				return true;
+			} catch (WSError e) {
+				mError = e;
+			} catch (Exception e) {
+				e.printStackTrace();
+				mError = new WSError(e.getClass().getSimpleName(), e.getMessage(), -1);
+			}
+			return false;
+		}
+
+		@Override
+		public void onPostExecute(Boolean result) {
+			try {
+				if (mLoadDialog != null) {
+					mLoadDialog.dismiss();
+					mLoadDialog = null;
+				}
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			}
+			if(result) {
+				finish();
+			} else {
+				if(mError != null)
+					LastFMApplication.getInstance().presentError(SignUp.this, mError);
+			}
 		}
 	}
 }
