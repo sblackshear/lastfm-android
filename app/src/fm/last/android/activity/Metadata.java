@@ -372,7 +372,7 @@ public class Metadata extends Activity {
 				mBio += "</span>";
 
 				if(RadioPlayerService.radioAvailable(Metadata.this))
-					mBio += "<br/> <a style='"+ stationbuttonmediumstyle + "' href='lastfm://artist/" + Uri.encode(artist.getName()) + "'>"
+					mBio += "<br/> <a style='"+ stationbuttonmediumstyle + "' href='lastfm://artist/" + Uri.encode(artist.getName()).replace("'", "%27") + "'>"
 							+ "<span style='" + stationbuttonspanstyle + "'>Play " + artist.getName() + " Radio</span></a>";
 				mBio += "</div><br style='clear:both;'/>" + formatBio(artist.getBio().getContent()) + "</div></body></html>";
 
