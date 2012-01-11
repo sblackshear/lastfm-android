@@ -1042,22 +1042,28 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 				}
 			}
 		} catch (WSError e) {
-			String message;
-			if (e.getCode() == WSError.ERROR_NotEnoughContent)
-				message = "NotEnoughContent";
-			else
-				message = e.getMessage();
-			try {
-				LastFMApplication.getInstance().tracker.trackEvent("Radio", // Category
-						"Error", // Action
-						message, // Label
-						0); // Value
-			} catch (SQLiteException e1) {
-				//Google Analytics doesn't appear to be thread safe
+			if (e.getMessage().contains("please try that again") && mPlaylistRetryCount++ < 4) {
+				logger.warning("Playlist service unavailable, retrying...");
+				Thread.sleep(2000);
+				refreshPlaylist();
+			} else {
+				String message;
+				if (e.getCode() == WSError.ERROR_NotEnoughContent)
+					message = "NotEnoughContent";
+				else
+					message = e.getMessage();
+				try {
+					LastFMApplication.getInstance().tracker.trackEvent("Radio", // Category
+							"Error", // Action
+							message, // Label
+							0); // Value
+				} catch (SQLiteException e1) {
+					//Google Analytics doesn't appear to be thread safe
+				}
+				logger.severe("Web service error: " + e.getMessage() + " code: " + e.getCode());
+				mError = e;
+				throw e;
 			}
-			logger.severe("Web service error: " + e.getMessage());
-			mError = e;
-			throw e;
 		}
 	}
 
