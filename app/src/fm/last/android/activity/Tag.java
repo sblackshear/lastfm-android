@@ -284,7 +284,7 @@ public class Tag extends Activity {
 				topTags = mServer.getArtistTopTags(mArtist, null);
 				oldTags = mServer.getArtistTags(mArtist, mSession.getKey());
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		} catch (WSError e) {
 			e.printStackTrace();

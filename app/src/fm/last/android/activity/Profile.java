@@ -112,7 +112,7 @@ public class Profile extends ActivityGroup {
 				}
 			} else {
 				Cursor cursor = managedQuery(getIntent().getData(), null, null, null, null);
-				if(cursor.moveToNext()) {
+				if(cursor != null && cursor.moveToNext()) {
 					username = cursor.getString(cursor.getColumnIndex("DATA1"));
 				}
 			}
@@ -367,8 +367,10 @@ public class Profile extends ActivityGroup {
 				editor.putBoolean("lastfm_radio", userSession.getRadio());
 				editor.putBoolean("lastfm_freetrial", userSession.getFreeTrial());
 				editor.putBoolean("lastfm_expired", userSession.getExpired());
-				editor.putInt("lastfm_playsleft", userSession.getPlaysLeft());
-				editor.putInt("lastfm_playselapsed", userSession.getPlaysElapsed());
+				if(userSession.getPlaysLeft() != null)
+					editor.putInt("lastfm_playsleft", userSession.getPlaysLeft());
+				if(userSession.getPlaysElapsed() != null)
+					editor.putInt("lastfm_playselapsed", userSession.getPlaysElapsed());
 				editor.commit();
 			}
 		}

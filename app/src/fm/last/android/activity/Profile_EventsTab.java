@@ -251,6 +251,8 @@ public class Profile_EventsTab extends ListActivity implements LocationListener 
 					result.setEventsSource(events);
 					return result;
 				}
+			} catch (WSError e) {
+				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (NullPointerException e) {
@@ -290,6 +292,8 @@ public class Profile_EventsTab extends ListActivity implements LocationListener 
 					result.setEventsSource(events);
 					return result;
 				}
+			} catch (WSError e) {
+				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (NullPointerException e) {

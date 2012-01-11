@@ -552,7 +552,8 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 				if(lostDataConnection && bufferPercent < 99) {
 					logger.info("Track ran out of data, pausing");
 					pause();
-					mp.release();
+					if(mp != null)
+						mp.release();
 					mp = null;
 					ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 					if(cm != null) {
