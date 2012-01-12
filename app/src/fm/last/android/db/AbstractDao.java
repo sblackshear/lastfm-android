@@ -3,8 +3,6 @@ package fm.last.android.db;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import android.content.ContentValues;
 import android.database.Cursor;

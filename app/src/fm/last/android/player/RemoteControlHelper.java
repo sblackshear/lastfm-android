@@ -25,7 +25,6 @@ import java.lang.reflect.Method;
  * Contains methods to handle registering/unregistering remote control clients.  These methods only
  * run on ICS devices.  On previous devices, all methods are no-ops.
  */
-@SuppressWarnings({"unchecked", "rawtypes"})
 public class RemoteControlHelper {
     private static final String TAG = "RemoteControlHelper";
 
@@ -37,7 +36,8 @@ public class RemoteControlHelper {
     static {
         try {
             ClassLoader classLoader = RemoteControlHelper.class.getClassLoader();
-            Class sRemoteControlClientClass =
+            @SuppressWarnings("rawtypes")
+			Class sRemoteControlClientClass =
                     RemoteControlClientCompat.getActualRemoteControlClientClass(classLoader);
             sRegisterRemoteControlClientMethod = AudioManager.class.getMethod(
                     "registerRemoteControlClient", new Class[]{sRemoteControlClientClass});

@@ -42,7 +42,6 @@ import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.ContactsContract.RawContacts.Entity;
-import android.util.Log;
 
 /**
  * @author sam

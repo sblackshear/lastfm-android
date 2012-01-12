@@ -25,7 +25,6 @@ import fm.last.android.R;
 import fm.last.android.adapter.ListAdapter;
 import fm.last.android.adapter.ListEntry;
 import fm.last.android.player.RadioPlayerService;
-import fm.last.android.utils.AsyncTaskEx;
 import fm.last.android.utils.ImageCache;
 import fm.last.api.LastFmServer;
 import fm.last.api.WSError;

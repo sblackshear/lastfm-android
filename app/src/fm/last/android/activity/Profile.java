@@ -58,6 +58,7 @@ import fm.last.api.Session;
 import fm.last.api.SessionInfo;
 import fm.last.api.WSError;
 
+@SuppressWarnings("deprecation")
 public class Profile extends ActivityGroup {
 	private TabHost mTabHost;
 	private boolean mIsPlaying = false;

@@ -30,8 +30,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Config;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -139,9 +137,6 @@ public class ShareResolverActivity extends ListActivity {
 				ResolveInfo r0 = rList.get(0);
 				for (int i = 1; i < N; i++) {
 					ResolveInfo ri = rList.get(i);
-					if (Config.LOGV)
-						Log.v("ResolveListActivity", r0.activityInfo.name + "=" + r0.priority + "/" + r0.isDefault + " vs " + ri.activityInfo.name + "="
-								+ ri.priority + "/" + ri.isDefault);
 					if (r0.priority != ri.priority || r0.isDefault != ri.isDefault) {
 						while (i < N) {
 							rList.remove(i);
