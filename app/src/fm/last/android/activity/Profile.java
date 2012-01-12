@@ -80,7 +80,6 @@ public class Profile extends ActivityGroup {
 		boolean isAuthenticatedUser = false;
 
 		super.onCreate(icicle);
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.home);
 		Session session = LastFMApplication.getInstance().session;
 		if (session == null || session.getName() == null || (Integer.decode(Build.VERSION.SDK) >= 6 && !AccountAuthenticatorService.hasLastfmAccount(this))) {

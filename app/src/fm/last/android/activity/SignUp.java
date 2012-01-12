@@ -53,7 +53,6 @@ public class SignUp extends Activity {
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.signup);
 
 		mUsername = (TextView) findViewById(R.id.username);

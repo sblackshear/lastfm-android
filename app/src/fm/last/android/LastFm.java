@@ -75,7 +75,6 @@ public class LastFm extends Activity {
 	public void onCreate(Bundle icicle) {
 
 		super.onCreate(icicle);
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		SharedPreferences settings = getSharedPreferences(PREFS, 0);
 		String user = settings.getString("lastfm_user", "");
 		String session_key = settings.getString("lastfm_session_key", "");

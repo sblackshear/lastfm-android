@@ -103,7 +103,6 @@ public class Player extends Activity {
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
 		setContentView(R.layout.audio_player);
 		setVolumeControlStream(android.media.AudioManager.STREAM_MUSIC);
