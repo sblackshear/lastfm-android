@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="fm.last.android" android:versionCode="57" android:versionName="1.9.5">
+	package="fm.last.android" android:versionCode="58" android:versionName="1.9.6">
 	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -16,15 +16,16 @@
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 	<uses-permission android:name="android.permission.READ_CALENDAR" />
 	<uses-permission android:name="android.permission.WRITE_CALENDAR" />
-	
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+		
 	<uses-feature android:name="android.hardware.location" android:required="false" />
 	<uses-feature android:name="android.hardware.wifi" android:required="false" />
 
 	<supports-screens android:smallScreens="true"
 		android:normalScreens="true" android:largeScreens="true" android:xlargeScreens="true"
 		android:anyDensity="true" />
+
 	<uses-sdk android:minSdkVersion="3" android:targetSdkVersion="10"/>
-	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
 	<application android:icon="@drawable/icon" android:label="@string/app_name"
 		android:name="LastFMApplication" android:installLocation="internalOnly">
