@@ -44,7 +44,6 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.Window;
 import android.widget.TabHost;
 import fm.last.android.AndroidLastFmServerFactory;
 import fm.last.android.LastFMApplication;
