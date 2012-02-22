@@ -519,6 +519,15 @@ public class ScrobblerService extends Service {
 			return;
 		}
 		
+		/*if(intent.getAction() != null) { //Dump the intent to the log for troubleshooting buggy apps
+			logger.info("Intent: " + intent.getAction());
+			if(intent.getExtras() != null && intent.getExtras().size() > 0) {
+				for(String key : intent.getExtras().keySet()) {
+					logger.info("Key: " + key + " value: " + intent.getExtras().get(key));
+				}
+			}
+		}*/
+		
 		if (intent.getAction().equals(META_CHANGED)) {
 			long startTime = System.currentTimeMillis() / 1000;
 			long position = intent.getLongExtra("position", 0) / 1000;
