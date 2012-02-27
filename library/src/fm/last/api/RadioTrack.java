@@ -50,7 +50,7 @@ public class RadioTrack implements Serializable {
 	private String identifier;
 	private String album;
 	private String creator;
-	private int duration;
+	private long duration;
 	private String imageUrl;
 	private String trackAuth;
 	private Boolean loved;
@@ -62,7 +62,7 @@ public class RadioTrack implements Serializable {
 		this.identifier = identifier;
 		this.album = album;
 		this.creator = creator;
-		this.duration = new Integer(duration).intValue();
+		this.duration = new Long(duration).longValue();
 		this.imageUrl = imageUrl;
 		this.trackAuth = trackAuth;
 		this.loved = loved;
@@ -93,7 +93,7 @@ public class RadioTrack implements Serializable {
 		return creator;
 	}
 
-	public int getDuration() {
+	public long getDuration() {
 		return duration;
 	}
 

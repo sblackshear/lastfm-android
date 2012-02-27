@@ -319,7 +319,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 			Session session = intent.getParcelableExtra("session");
 			if(currentStationURL != null && currentStationURL.equals(stationURL)) {
 				if(mState == STATE_PAUSED)
-					pause();
+					new PauseTask().execute((Void)null);
 				if(mState != STATE_STOPPED)
 					return;
 			}
@@ -1277,6 +1277,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 					nm.notify(NOTIFY_ID, notification);
 				}
 	            // Update the remote controls
+				try {
 	            mRemoteControlClientCompat.editMetadata(true)
 	                    .putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, currentTrack.getCreator())
 	                    .putString(MediaMetadataRetriever.METADATA_KEY_TITLE, currentTrack.getTitle())
@@ -1286,6 +1287,9 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 	                            RemoteControlClientCompat.MetadataEditorCompat.METADATA_KEY_ARTWORK,
 	                            mArtwork)
 	                    .apply();
+				} catch (Exception e) {
+					
+				}
 	            logger.info("Album art updated");
 				notifyChange(ARTWORK_AVAILABLE);
 			}
@@ -1360,6 +1364,15 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		}
 	}
 
+	private class PauseTask extends AsyncTaskEx<Void, Void, Void> {
+
+		@Override
+		public Void doInBackground(Void... input) {
+			pause();
+			return null;
+		}
+	}
+
 	private final IRadioPlayer.Stub mBinder = new IRadioPlayer.Stub() {
 		public boolean supportsFocus() {
 			return mFocusHelper.isSupported();
@@ -1384,8 +1397,8 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		public void pause() throws DeadObjectException {
 			if(mState == STATE_PAUSED && mp != null)
 				mp.setVolume(1.0f, 1.0f);
-			RadioPlayerService.this.pause();
 			lostDataConnection = false;
+			new PauseTask().execute((Void)null);
 		}
 
 		public void stop() throws DeadObjectException {

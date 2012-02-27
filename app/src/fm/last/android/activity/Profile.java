@@ -102,7 +102,7 @@ public class Profile extends ActivityGroup {
 				LastFMApplication.getInstance().playRadioStation(LastFMApplication.getInstance().mCtx, intent.getData().toString(), true);
 				finish();
 				return;
-			} else if(getIntent().getData().getScheme().equals("http")) {  //The search provider sent us an http:// URL, forward it to the metadata screen
+			} else if(getIntent().getData().getScheme() != null && getIntent().getData().getScheme().equals("http")) {  //The search provider sent us an http:// URL, forward it to the metadata screen
 				Intent i = null;
 				if(intent.getData().getPath().contains("/user/")) {
 					List<String> segments = getIntent().getData().getPathSegments();

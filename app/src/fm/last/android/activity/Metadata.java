@@ -377,7 +377,7 @@ public class Metadata extends Activity {
 				success = true;
 			} catch (OutOfMemoryError e) {
 				e.printStackTrace();
-			} catch (IOException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			} catch (WSError e) {
 				e.printStackTrace();
@@ -558,7 +558,7 @@ public class Metadata extends Activity {
 			} catch (WSError e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
-			} catch (IOException e1) {
+			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
@@ -670,8 +670,7 @@ public class Metadata extends Activity {
 					result = true;
 			} catch (OutOfMemoryError e) {
 				e.printStackTrace();
-
-			} catch (IOException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			} catch (WSError e) {
 			}

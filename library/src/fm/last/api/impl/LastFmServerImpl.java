@@ -783,7 +783,7 @@ final class LastFmServerImpl implements LastFmServer {
 		post(baseUrl, params);
 	}
 	
-	public void scrobbleTrack(String artist, String track, String album, long timestamp, int duration, String context, String streamid, String sk) throws IOException {
+	public void scrobbleTrack(String artist, String track, String album, long timestamp, long duration, String context, String streamid, String sk) throws IOException {
 		Map<String, String> params = createParams("track.scrobble");
 		params.put("artist", artist);
 		params.put("track", track);
@@ -799,7 +799,7 @@ final class LastFmServerImpl implements LastFmServer {
 		post(baseUrl, params);
 	}
 	
-	public void updateNowPlaying(String artist, String track, String album, int duration, String context, String sk) throws IOException {
+	public void updateNowPlaying(String artist, String track, String album, long duration, String context, String sk) throws IOException {
 		Map<String, String> params = createParams("track.updateNowPlaying");
 		params.put("artist", artist);
 		params.put("track", track);
@@ -812,7 +812,7 @@ final class LastFmServerImpl implements LastFmServer {
 		post(baseUrl, params);
 	}
 	
-	public void removeNowPlaying(String artist, String track, String album, int duration, String context, String sk) throws IOException {
+	public void removeNowPlaying(String artist, String track, String album, long duration, String context, String sk) throws IOException {
 		Map<String, String> params = createParams("track.removeNowPlaying");
 		params.put("artist", artist);
 		params.put("track", track);

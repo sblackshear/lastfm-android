@@ -695,7 +695,7 @@ public class ScrobblerService extends Service {
 
 			try {
 				mScrobblerLock.lock();
-				server.removeNowPlaying(mTrack.getCreator(), mTrack.getTitle(), mTrack.getAlbum(), new Integer(mTrack.getDuration() / 1000), ScrobblerService.this.player, mSession.getKey());
+				server.removeNowPlaying(mTrack.getCreator(), mTrack.getTitle(), mTrack.getAlbum(), (long)(mTrack.getDuration() / 1000), ScrobblerService.this.player, mSession.getKey());
 				success = true;
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -742,7 +742,7 @@ public class ScrobblerService extends Service {
 
 			try {
 				mScrobblerLock.lock();
-				server.updateNowPlaying(mTrack.getCreator(), mTrack.getTitle(), mTrack.getAlbum(), new Integer(mTrack.getDuration() / 1000), ScrobblerService.this.player, mSession.getKey());
+				server.updateNowPlaying(mTrack.getCreator(), mTrack.getTitle(), mTrack.getAlbum(), (long)(mTrack.getDuration() / 1000), ScrobblerService.this.player, mSession.getKey());
 				success = true;
 			} catch (Exception e) {
 				e.printStackTrace();

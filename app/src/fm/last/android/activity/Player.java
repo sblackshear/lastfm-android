@@ -883,6 +883,7 @@ public class Player extends Activity {
 					}
 				} catch (NullPointerException e) {
 				} catch (IOException e) {
+				} catch (WSError e) {
 				}
 			}
 			return null;
