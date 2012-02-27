@@ -206,10 +206,10 @@ public class CalendarSyncAdapterService extends Service {
 		mContentResolver = context.getContentResolver();
 
 		//If our app has requested a full sync, we're going to delete all our local events and start over
-		boolean is_full_sync = PreferenceManager.getDefaultSharedPreferences(LastFMApplication.getInstance()).getBoolean("do_full_sync", false);
+		boolean is_full_sync = PreferenceManager.getDefaultSharedPreferences(LastFMApplication.getInstance()).getBoolean("cal_do_full_sync", false);
 		
 		//If our schema is out-of-date, do a fresh sync
-		if(PreferenceManager.getDefaultSharedPreferences(LastFMApplication.getInstance()).getInt("sync_schema", 0) < syncSchema)
+		if(PreferenceManager.getDefaultSharedPreferences(LastFMApplication.getInstance()).getInt("cal_sync_schema", 0) < syncSchema)
 			is_full_sync = true;
 		
 		long calendar_id = getCalendar(account);
@@ -233,8 +233,8 @@ public class CalendarSyncAdapterService extends Service {
 		c1.close();
 
 		Editor editor = PreferenceManager.getDefaultSharedPreferences(LastFMApplication.getInstance()).edit();
-		editor.remove("do_full_sync");
-		editor.putInt("sync_schema", syncSchema);
+		editor.remove("cal_do_full_sync");
+		editor.putInt("cal_sync_schema", syncSchema);
 		editor.commit();
 		
 		LastFmServer server = AndroidLastFmServerFactory.getServer();

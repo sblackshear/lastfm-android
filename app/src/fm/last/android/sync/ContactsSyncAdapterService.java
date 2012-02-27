@@ -42,6 +42,7 @@ import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.ContactsContract.RawContacts.Entity;
+import android.util.Log;
 
 /**
  * @author sam
@@ -300,6 +301,10 @@ public class ContactsSyncAdapterService extends Service {
 			}
 		}
 
+		Log.i("Sync", "DB Schema: " + PreferenceManager.getDefaultSharedPreferences(LastFMApplication.getInstance()).getInt("sync_schema", 0));
+		if(is_full_sync)
+			Log.i("Sync", "Performing full sync");
+		
 		Editor editor = PreferenceManager.getDefaultSharedPreferences(LastFMApplication.getInstance()).edit();
 		editor.remove("do_full_sync");
 		editor.putInt("sync_schema", syncSchema);
@@ -389,7 +394,7 @@ public class ContactsSyncAdapterService extends Service {
 				updateContactName(operationList, entry.raw_id, user.getRealName(), username);
 			}
 
-			if(operationList.size() >= 50) {
+			if(operationList.size() >= 25) {
 				try {
 					mContentResolver.applyBatch(ContactsContract.AUTHORITY, operationList);
 				} catch (Exception e) {

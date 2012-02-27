@@ -390,6 +390,10 @@ public class LastFMApplication extends Application {
 		editor.remove("scrobbler_npurl");
 		editor.remove("sync_nag");
 		editor.remove("sync_nag_cal");
+		editor.remove("sync_schema");
+		editor.remove("do_full_sync");
+		editor.remove("cal_sync_schema");
+		editor.remove("cal_do_full_sync");
 		editor.commit();
 		session = null;
 		try {
