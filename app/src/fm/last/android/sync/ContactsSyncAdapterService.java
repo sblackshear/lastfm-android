@@ -301,10 +301,6 @@ public class ContactsSyncAdapterService extends Service {
 			}
 		}
 
-		Log.i("Sync", "DB Schema: " + PreferenceManager.getDefaultSharedPreferences(LastFMApplication.getInstance()).getInt("sync_schema", 0));
-		if(is_full_sync)
-			Log.i("Sync", "Performing full sync");
-		
 		Editor editor = PreferenceManager.getDefaultSharedPreferences(LastFMApplication.getInstance()).edit();
 		editor.remove("do_full_sync");
 		editor.putInt("sync_schema", syncSchema);
