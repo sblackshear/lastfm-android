@@ -219,8 +219,7 @@ public class CalendarSyncAdapterService extends Service {
 		}
 		
 		// Load the local Last.fm events
-		Uri eventsUri = Events.CONTENT_URI.buildUpon().appendQueryParameter(Events.CALENDAR_ID, String.valueOf(calendar_id)).build();
-		Cursor c1 = mContentResolver.query(eventsUri, new String[] { Events._ID, Events._SYNC_ID }, null, null, null);
+		Cursor c1 = mContentResolver.query(Events.CONTENT_URI.buildUpon().appendQueryParameter(Events.ACCOUNT_NAME, account.name).appendQueryParameter(Events.ACCOUNT_TYPE, account.type).build(), new String[] { Events._ID, Events._SYNC_ID }, Events.CALENDAR_ID + "=?", new String[] { String.valueOf(calendar_id) }, null);
 		while (c1 != null && c1.moveToNext()) {
 			if(is_full_sync) {
 				deleteEvent(context, account, c1.getLong(0));
