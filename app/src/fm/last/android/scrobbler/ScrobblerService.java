@@ -400,7 +400,7 @@ public class ScrobblerService extends Service {
 				try {
 					Track t = server.getTrackInfo(artist, track, "");
 					return Long.parseLong(t.getDuration());
-				} catch (IOException e) {
+				} catch (Exception e) {
 				} catch (WSError e) {
 				}
 			}

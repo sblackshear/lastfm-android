@@ -890,20 +890,22 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 			clearNotification();
 			notifyChange(PLAYBACK_STATE_CHANGED);
 			notifyChange(ScrobblerService.PLAYBACK_PAUSED);
-			mp.setOnErrorListener(null);
-			mp.setOnCompletionListener(null);
-			try {
-				mTrackPosition = mp.getCurrentPosition();
-				if(mp.isPlaying()) {
-					mp.pause();
-				} else {
-					mp.reset();
-					mp.release();
-					mp = null;
-					mTrackPosition = 0;
+			if(mp != null) {
+				mp.setOnErrorListener(null);
+				mp.setOnCompletionListener(null);
+				try {
+					mTrackPosition = mp.getCurrentPosition();
+					if(mp.isPlaying()) {
+						mp.pause();
+					} else {
+						mp.reset();
+						mp.release();
+						mp = null;
+						mTrackPosition = 0;
+					}
+				} catch (Exception e) { //Sometimes the MediaPlayer is in a state where it can't pause
+					e.printStackTrace();
 				}
-			} catch (Exception e) { //Sometimes the MediaPlayer is in a state where it can't pause
-				e.printStackTrace();
 			}
 			mState = STATE_PAUSED;
 			if(currentTrack != null)
@@ -1258,7 +1260,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 
 		@Override
 		public void onPostExecute(Boolean result) {
-			if(result && currentTrack != null && currentStation != null && currentTrack.getAlbum().equals(albumName) && currentTrack.getCreator().equals(artistName)) {
+			if(nm != null && result && currentTrack != null && currentStation != null && currentTrack.getAlbum().equals(albumName) && currentTrack.getCreator().equals(artistName)) {
 				if(art != null)
 					mArtwork = art;
 				else

@@ -441,7 +441,7 @@ public class Metadata extends Activity {
 				return iconifiedEntries;
 			} catch (OutOfMemoryError e) {
 				e.printStackTrace();
-			} catch (IOException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			} catch (WSError e) {
 			}
