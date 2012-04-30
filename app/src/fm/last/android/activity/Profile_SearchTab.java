@@ -58,8 +58,8 @@ public class Profile_SearchTab extends ListActivity implements OnClickListener, 
 	private ImageCache mImageCache;
 	
 	@Override
-	public void onCreate(Bundle icicle) {
-		super.onCreate(icicle);
+	public void onCreate(Bundle state) {
+		super.onCreate(state);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.search);
 
