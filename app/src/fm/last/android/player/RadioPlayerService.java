@@ -686,6 +686,10 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 
 	private void playTrack(RadioTrack track, MediaPlayer p) {
 		try {
+			if (mState == STATE_STOPPED || mState == STATE_PAUSED || mState == STATE_PREPARING) {
+				logger.severe("playTrack() called from wrong state!");
+				return;
+			}
 			if (p == mp) {
 				currentTrack = track;
 				RadioWidgetProvider.updateAppWidget_playing(this, track.getTitle(), track.getCreator(), 0, 0, true, track.getLoved(), false);
@@ -699,13 +703,9 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 				URL newURL = UrlUtil.getRedirectedUrl(new URL(track.getLocationUrl()));
 				track.setLocationUrl(newURL.toString());
 			}
-			if (mState == STATE_STOPPED || mState == STATE_PAUSED || mState == STATE_PREPARING) {
-				logger.severe("playTrack() called from wrong state!");
-				return;
-			}
 			String url = track.getLocationUrl();
 			//Stream through a proxy on Honeycomb to enforce one connection per track
-			if(Integer.decode(Build.VERSION.SDK) > 10 && Integer.decode(Build.VERSION.SDK) < 14) {
+			if(Integer.decode(Build.VERSION.SDK) > 10 && (Integer.decode(Build.VERSION.SDK) < 14 || Build.MODEL.equals("A500") || Build.MODEL.equals("ST18i"))) {
 				if (proxy == null) {
 					proxy = new StreamProxy();
 					proxy.init();
