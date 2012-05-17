@@ -342,7 +342,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 			
 		}
         if(proxy != null && proxy.isRunning()) {
-        	proxy.stop();
+        	new StopProxyTask(proxy).execute();
         	proxy = null;
         }
 		clearNotification();
@@ -695,7 +695,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 				RadioWidgetProvider.updateAppWidget_playing(this, track.getTitle(), track.getCreator(), 0, 0, true, track.getLoved(), false);
 			}
 			if(proxy != null) {
-				proxy.stop();
+				new StopProxyTask(proxy).execute();
 				proxy = null;
 			}
 			
@@ -815,7 +815,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
             mRemoteControlClientCompat.setPlaybackState(RemoteControlClient.PLAYSTATE_STOPPED);
         
         if(proxy != null && proxy.isRunning()) {
-        	proxy.stop();
+        	new StopProxyTask(proxy).execute();
         	proxy = null;
         }
         
@@ -1369,6 +1369,20 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		@Override
 		public Void doInBackground(Void... input) {
 			pause();
+			return null;
+		}
+	}
+
+	private class StopProxyTask extends AsyncTaskEx<Void, Void, Void> {
+		StreamProxy p;
+		
+		StopProxyTask(StreamProxy p) {
+			this.p = p;
+		}
+
+		@Override
+		public Void doInBackground(Void... input) {
+			p.stop();
 			return null;
 		}
 	}
