@@ -98,6 +98,7 @@ public class StreamProxy implements Runnable {
   }
 
   public void stop() {
+    Log.d(LOG_TAG, "stopping");
     isRunning = false;
     
     if (thread == null) {
@@ -163,7 +164,14 @@ public class StreamProxy implements Runnable {
     return request;
   }
 
-  private HttpResponse download(String url) {
+  private void processRequest(HttpRequest request, Socket client)
+      throws IllegalStateException, IOException {
+    if (request == null) {
+      return;
+    }
+    Log.d(LOG_TAG, "processing");
+    String url = request.getRequestLine().getUri();
+    
     DefaultHttpClient seed = new DefaultHttpClient();
     SchemeRegistry registry = new SchemeRegistry();
     registry.register(
@@ -172,27 +180,17 @@ public class StreamProxy implements Runnable {
         registry);
     DefaultHttpClient http = new DefaultHttpClient(mgr, seed.getParams());
     HttpGet method = new HttpGet(url);
-    HttpResponse response = null;
+    HttpResponse realResponse = null;
     try {
       Log.d(LOG_TAG, "starting download");
-      response = http.execute(method);
+      realResponse = http.execute(method);
       Log.d(LOG_TAG, "downloaded");
     } catch (ClientProtocolException e) {
       Log.e(LOG_TAG, "Error downloading", e);
     } catch (IOException e) {
       Log.e(LOG_TAG, "Error downloading", e);
     }
-    return response;
-  }
 
-  private void processRequest(HttpRequest request, Socket client)
-      throws IllegalStateException, IOException {
-    if (request == null) {
-      return;
-    }
-    Log.d(LOG_TAG, "processing");
-    String url = request.getRequestLine().getUri();
-    HttpResponse realResponse = download(url);
     if (realResponse == null) {
       return;
     }
@@ -226,16 +224,14 @@ public class StreamProxy implements Runnable {
       client.getOutputStream().write(buffer, 0, buffer.length);
 
       // Start streaming content.
-      byte[] buff = new byte[1024 * 128];
+      byte[] buff = new byte[8192];
       while (isRunning && (readBytes = data.read(buff, 0, buff.length)) != -1) {
         client.getOutputStream().write(buff, 0, readBytes);
       }
     } catch (Exception e) {
       Log.e("", e.getMessage(), e);
     } finally {
-      if (data != null) {
-        data.close();
-      }
+      mgr.shutdown();
       client.close();
       Log.d(LOG_TAG, "streaming complete");
     }
