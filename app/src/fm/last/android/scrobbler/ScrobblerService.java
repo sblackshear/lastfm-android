@@ -21,8 +21,8 @@
 package fm.last.android.scrobbler;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.Collections;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.FileHandler;
@@ -55,6 +55,7 @@ import fm.last.android.LastFm;
 import fm.last.android.R;
 import fm.last.android.RadioWidgetProvider;
 import fm.last.android.db.ScrobblerQueueDao;
+import fm.last.android.db.TrackDurationCacheDao;
 import fm.last.api.LastFmServer;
 import fm.last.api.RadioTrack;
 import fm.last.api.Session;
@@ -371,6 +372,8 @@ public class ScrobblerService extends Service {
 	}
 
 	public long lookupDuration(String artist, String track) {
+		logger.info("Duration was unavailable, looking it up!");
+		
 		final String[] columns = new String[] {
 				MediaStore.Audio.AudioColumns.DURATION };
 		
@@ -390,6 +393,12 @@ public class ScrobblerService extends Service {
 			return cur.getLong(cur.getColumnIndex(MediaStore.Audio.AudioColumns.DURATION));
 		}
 
+		//Check to see if we've cached it from a previous network lookup
+		long duration = TrackDurationCacheDao.getInstance().getDurationForTrack(artist, track);
+		logger.info("Duration from cache: " + duration);
+		if(duration > 0)
+			return duration;
+		
 		//If we're allowed to connect to the network, look up the track info on Last.fm
 		ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 		NetworkInfo ni = cm.getActiveNetworkInfo();
@@ -399,6 +408,8 @@ public class ScrobblerService extends Service {
 				LastFmServer server = AndroidLastFmServerFactory.getServer();
 				try {
 					Track t = server.getTrackInfo(artist, track, "");
+					TrackDurationCacheDao.getInstance().save(Collections.singleton(t));
+					logger.info("Duration from network: " + t.getDuration());
 					return Long.parseLong(t.getDuration());
 				} catch (Exception e) {
 				} catch (WSError e) {

@@ -15,7 +15,7 @@ public class LastFmDbHelper extends SQLiteOpenHelper
 	 * The DB's version number.
 	 * This needs to be increased on schema changes.
 	 */
-	public static final int DB_VERSION = 5;
+	public static final int DB_VERSION = 6;
 	
 	/**
 	 * Singleton instance of {@link ScrobblerQueueDao}.
@@ -39,6 +39,7 @@ public class LastFmDbHelper extends SQLiteOpenHelper
 	{
 		ScrobblerQueueDao.getInstance().clearTable();
 		RecentStationsDao.getInstance().clearTable();
+		TrackDurationCacheDao.getInstance().clearTable();
 	}
 
 	
@@ -74,6 +75,12 @@ public class LastFmDbHelper extends SQLiteOpenHelper
 				" Loved INTEGER NOT NULL," +
 				" CurrentTrack INTEGER NOT NULL)");
 
+		// create the table for caching track durations
+		db.execSQL("CREATE TABLE IF NOT EXISTS " + TrackDurationCacheDao.DB_TABLE_TRACKDURATIONS +
+				" (Artist VARCHAR NOT NULL, " +
+				"Title VARCHAR NOT NULL, " +
+				"Duration VARCHAR NOT NULL, PRIMARY KEY(Artist, Title))");
+		
 	}
 
 	/*
@@ -86,6 +93,7 @@ public class LastFmDbHelper extends SQLiteOpenHelper
 		// for now we just drop everything and create it again
 		db.execSQL("DROP TABLE IF EXISTS " + RecentStationsDao.DB_TABLE_RECENTSTATIONS);
 		db.execSQL("DROP TABLE IF EXISTS " + ScrobblerQueueDao.DB_TABLE_SCROBBLERQUEUE);
+		db.execSQL("DROP TABLE IF EXISTS " + TrackDurationCacheDao.DB_TABLE_TRACKDURATIONS);
 
 		onCreate(db);
 	}
