@@ -46,6 +46,7 @@ import java.security.cert.X509Certificate;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.util.Log;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;

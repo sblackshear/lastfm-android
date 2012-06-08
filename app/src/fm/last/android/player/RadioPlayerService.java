@@ -132,7 +132,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
     RemoteControlClientCompat mRemoteControlClientCompat;
     private Bitmap mArtwork = null;
     
-    private StreamProxy proxy;
+    private StreamProxy proxy = null;
 
 	public static final String META_CHANGED = "fm.last.android.metachanged";
 	public static final String PLAYBACK_FINISHED = "fm.last.android.playbackcomplete";

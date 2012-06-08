@@ -69,7 +69,7 @@ public class RadioWidgetProvider extends AppWidgetProvider {
 	}
 
 	public static boolean isAndroidMusicInstalled(Context ctx) {
-		if(Integer.decode(Build.VERSION.SDK) > 8)
+		if(Integer.decode(Build.VERSION.SDK) > 8 || Build.MANUFACTURER.toUpperCase().equals("LGE"))
 			return false;
 		try {
 			PackageManager pm = ctx.getPackageManager();
