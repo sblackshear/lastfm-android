@@ -139,11 +139,25 @@ public class StreamProxy implements Runnable {
     HttpRequest request = null;
     InputStream is;
     String firstLine;
+    String range = null;
+    String ua = null;
     try {
       is = client.getInputStream();
       BufferedReader reader = new BufferedReader(new InputStreamReader(is),
           8192);
       firstLine = reader.readLine();
+      
+      String line = null;
+      
+      do {
+    	  line = reader.readLine();
+    	  if(line != null && line.toLowerCase().startsWith("range: ")) {
+    		  range = line.substring(7);
+    	  }
+    	  if(line != null && line.toLowerCase().startsWith("user-agent: ")) {
+    		  ua = line.substring(12);
+    	  }
+      } while(line != null && reader.ready());
     } catch (IOException e) {
       Log.e(LOG_TAG, "Error parsing request", e);
       return request;
@@ -160,7 +174,11 @@ public class StreamProxy implements Runnable {
     Log.d(LOG_TAG, uri);
     String realUri = uri.substring(1);
     Log.d(LOG_TAG, realUri);
-    request = new BasicHttpRequest(method, realUri);
+    request = new BasicHttpRequest(method, realUri, new ProtocolVersion("HTTP", 1,1));
+    if(range != null)
+    	request.addHeader("Range", range);
+    if(ua != null)
+    	request.addHeader("User-Agent", ua);
     return request;
   }
 
@@ -180,6 +198,9 @@ public class StreamProxy implements Runnable {
         registry);
     DefaultHttpClient http = new DefaultHttpClient(mgr, seed.getParams());
     HttpGet method = new HttpGet(url);
+    for (Header h : request.getAllHeaders()) {
+    	method.addHeader(h);
+    }
     HttpResponse realResponse = null;
     try {
       Log.d(LOG_TAG, "starting download");
