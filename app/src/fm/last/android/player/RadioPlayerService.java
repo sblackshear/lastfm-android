@@ -753,14 +753,12 @@ public class RadioPlayerService extends Service implements MusicFocusable {
                     RemoteControlClient.PLAYSTATE_PLAYING);
 
             mRemoteControlClientCompat.setTransportControlFlags(
-                    RemoteControlClient.FLAG_KEY_MEDIA_PLAY |
-                    RemoteControlClient.FLAG_KEY_MEDIA_PAUSE |
-                    RemoteControlClient.FLAG_KEY_MEDIA_NEXT |
-                    RemoteControlClient.FLAG_KEY_MEDIA_STOP);
+                    RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE|
+                    RemoteControlClient.FLAG_KEY_MEDIA_NEXT);
 
             // Update the remote controls
             mRemoteControlClientCompat.editMetadata(true)
-                    .putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, track.getCreator())
+                    .putString(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST, track.getCreator())
                     .putString(MediaMetadataRetriever.METADATA_KEY_TITLE, track.getTitle())
                     .putLong(MediaMetadataRetriever.METADATA_KEY_DURATION,
                             track.getDuration())
@@ -1279,7 +1277,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 	            // Update the remote controls
 				try {
 	            mRemoteControlClientCompat.editMetadata(true)
-	                    .putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, currentTrack.getCreator())
+	                    .putString(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST, currentTrack.getCreator())
 	                    .putString(MediaMetadataRetriever.METADATA_KEY_TITLE, currentTrack.getTitle())
 	                    .putLong(MediaMetadataRetriever.METADATA_KEY_DURATION,
 	                    		currentTrack.getDuration())
