@@ -22,6 +22,7 @@ package fm.last.android.scrobbler;
 
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -48,6 +49,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.widget.RemoteViews;
 import android.widget.Toast;
 import fm.last.android.AndroidLastFmServerFactory;
 import fm.last.android.LastFMApplication;
@@ -608,6 +610,13 @@ public class ScrobblerService extends Service {
 				String info = mCurrentTrack.title + " - " + mCurrentTrack.artist;
 				notification.setLatestEventInfo(this, getString(R.string.scrobbler_info_title), info, contentIntent);
 				notification.flags |= Notification.FLAG_ONGOING_EVENT;
+				try {
+					Field f = Notification.class.getField("priority");
+					f.setInt(notification, -2); //PRIORITY_MIN
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
 				nm.notify(1338, notification);
 			}
 		}
