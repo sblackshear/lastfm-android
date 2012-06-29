@@ -25,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -428,14 +429,7 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		}
 	}
 
-	private Notification buildNotification(Bitmap art) {
-		Notification notification = new Notification(R.drawable.as_statusbar, getString(R.string.playerservice_streaming_ticker_text, currentTrack.getTitle(),
-				currentTrack.getCreator()), System.currentTimeMillis());
-		PendingIntent contentIntent = PendingIntent.getActivity(RadioPlayerService.this, 0, new Intent(RadioPlayerService.this, Player.class), 0);
-		String info = currentTrack.getTitle() + " - " + currentTrack.getCreator();
-		notification.setLatestEventInfo(RadioPlayerService.this, currentStation.getName(), info, contentIntent);
-		notification.flags |= Notification.FLAG_ONGOING_EVENT;
-		RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.notification);
+	private void fillNotificationView(RemoteViews contentView, Bitmap art) {
 		if(art != null)
 			contentView.setImageViewBitmap(R.id.image, mArtwork);
 		else
@@ -460,7 +454,28 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		intent = new Intent("fm.last.android.widget.STOP");
 		pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
 		contentView.setOnClickPendingIntent(R.id.stop, pendingIntent);
+	}
+	
+	private Notification buildNotification(Bitmap art) {
+		Notification notification = new Notification(R.drawable.as_statusbar, getString(R.string.playerservice_streaming_ticker_text, currentTrack.getTitle(),
+				currentTrack.getCreator()), System.currentTimeMillis());
+		PendingIntent contentIntent = PendingIntent.getActivity(RadioPlayerService.this, 0, new Intent(RadioPlayerService.this, Player.class), 0);
+		String info = currentTrack.getTitle() + " - " + currentTrack.getCreator();
+		notification.setLatestEventInfo(RadioPlayerService.this, currentStation.getName(), info, contentIntent);
+		notification.flags |= Notification.FLAG_ONGOING_EVENT;
+		RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.notification);
+		fillNotificationView(contentView, art);
 		notification.contentView = contentView;
+		
+		try {
+			Field f = Notification.class.getField("bigContentView");
+			RemoteViews bigContentView = new RemoteViews(getPackageName(), R.layout.notification_big);
+			fillNotificationView(bigContentView, art);
+			f.set(notification, bigContentView);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		return notification;
 	}
 	
