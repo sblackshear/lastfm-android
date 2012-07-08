@@ -601,8 +601,7 @@ public class ScrobblerService extends Service {
 				NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 				nm.cancel(1338);
 
-				Notification notification = new Notification(R.drawable.as_statusbar, getString(R.string.scrobbler_ticker_text, mCurrentTrack.title,
-						mCurrentTrack.artist), System.currentTimeMillis());
+				Notification notification = new Notification(R.drawable.as_statusbar, null, System.currentTimeMillis());
 				Intent metaIntent = new Intent(this, fm.last.android.activity.Metadata.class);
 				metaIntent.putExtra("artist", mCurrentTrack.artist);
 				metaIntent.putExtra("track", mCurrentTrack.title);

@@ -3,11 +3,6 @@
 	xmlns:android="http://schemas.android.com/apk/res/android">
 
 	<PreferenceCategory android:title="@string/prefs_cat_about_title">
-		<fm.last.android.activity.BugReport
-			android:title="@string/prefs_bugreport_title"
-			android:summary="@string/prefs_bugreport_summary"
-			android:dialogLayout="@layout/bugreport"
-			android:negativeButtonText="@string/common_cancel" android:positiveButtonText="@string/prefs_bugreport_send"/>
 		<Preference
 			android:title="@string/prefs_tos_title"
 			android:key="tos"
