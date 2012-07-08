@@ -3,7 +3,6 @@
  */
 package fm.last.android.sync;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,6 +15,7 @@ import fm.last.api.WSError;
 
 import android.accounts.Account;
 import android.accounts.OperationCanceledException;
+import android.annotation.TargetApi;
 import android.app.Service;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
@@ -42,6 +42,7 @@ import android.util.Log;
  * @author sam
  * 
  */
+@TargetApi(14)
 public class CalendarSyncAdapterService extends Service {
 	private static SyncAdapterImpl sSyncAdapter = null;
 	private static ContentResolver mContentResolver = null;
@@ -288,9 +289,10 @@ public class CalendarSyncAdapterService extends Service {
 					e.printStackTrace();
 				}
 			}
-		} catch (IOException e1) {
+		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
+			return;
 		} catch (WSError e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
