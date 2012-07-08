@@ -436,29 +436,43 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 			contentView.setImageViewResource(R.id.image, R.drawable.no_artwork);
 		contentView.setTextViewText(R.id.title, currentTrack.getTitle());
 		contentView.setTextViewText(R.id.text, currentTrack.getCreator());
-		PendingIntent pendingIntent;
-		Intent intent;
-
-		intent = new Intent("fm.last.android.widget.LOVE");
-		pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
-		contentView.setOnClickPendingIntent(R.id.love, pendingIntent);
-
-		intent = new Intent("fm.last.android.widget.BAN");
-		pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
-		contentView.setOnClickPendingIntent(R.id.ban, pendingIntent);
-
-		intent = new Intent("fm.last.android.widget.SKIP");
-		pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
-		contentView.setOnClickPendingIntent(R.id.skip, pendingIntent);
-
-		intent = new Intent("fm.last.android.widget.STOP");
-		pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
-		contentView.setOnClickPendingIntent(R.id.stop, pendingIntent);
+		
+		if(Integer.decode(Build.VERSION.SDK) >= 11) {
+			PendingIntent pendingIntent;
+			Intent intent;
+	
+			intent = new Intent("fm.last.android.widget.LOVE");
+			pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
+			contentView.setOnClickPendingIntent(R.id.love, pendingIntent);
+			if(currentTrack.getLoved())
+				contentView.setImageViewResource(R.id.love, R.drawable.loved);
+			else
+				contentView.setImageViewResource(R.id.love, R.drawable.love);
+			
+			intent = new Intent("fm.last.android.widget.BAN");
+			pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
+			contentView.setOnClickPendingIntent(R.id.ban, pendingIntent);
+	
+			intent = new Intent("fm.last.android.widget.SKIP");
+			pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
+			contentView.setOnClickPendingIntent(R.id.skip, pendingIntent);
+			
+			if(mState == STATE_PREPARING || mState == STATE_PLAYING || mState == STATE_PAUSED) {
+				contentView.setBoolean(R.id.skip, "setEnabled", true);
+				contentView.setInt(R.id.skip, "setAlpha", 255);
+			} else {
+				contentView.setBoolean(R.id.skip, "setEnabled", false);
+				contentView.setInt(R.id.skip, "setAlpha", 100);
+			}
+	
+			intent = new Intent("fm.last.android.widget.STOP");
+			pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
+			contentView.setOnClickPendingIntent(R.id.stop, pendingIntent);
+		}
 	}
 	
-	private Notification buildNotification(Bitmap art) {
-		Notification notification = new Notification(R.drawable.as_statusbar, getString(R.string.playerservice_streaming_ticker_text, currentTrack.getTitle(),
-				currentTrack.getCreator()), System.currentTimeMillis());
+	private Notification buildNotification(Bitmap art, String ticker) {
+		Notification notification = new Notification(R.drawable.as_statusbar, ticker, System.currentTimeMillis());
 		PendingIntent contentIntent = PendingIntent.getActivity(RadioPlayerService.this, 0, new Intent(RadioPlayerService.this, Player.class), 0);
 		String info = currentTrack.getTitle() + " - " + currentTrack.getCreator();
 		notification.setLatestEventInfo(RadioPlayerService.this, currentStation.getName(), info, contentIntent);
@@ -473,14 +487,13 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 			fillNotificationView(bigContentView, art);
 			f.set(notification, bigContentView);
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
 		
 		return notification;
 	}
 	
 	@SuppressWarnings("rawtypes")
-	private void playingNotify() {
+	private void playingNotify(String ticker) {
 
 		if (currentTrack == null || currentTrack.getTitle() == null || currentTrack.getCreator() == null)
 			return;
@@ -489,11 +502,10 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 
 		Notification notification = null;
 		try {
-			notification = buildNotification(mArtwork);
+			notification = buildNotification(mArtwork, ticker);
 			nm.notify(NOTIFY_ID, notification);
 		} catch (java.lang.RuntimeException e) {
-			notification = new Notification(R.drawable.as_statusbar, getString(R.string.playerservice_streaming_ticker_text, currentTrack.getTitle(),
-					currentTrack.getCreator()), System.currentTimeMillis());
+			notification = new Notification(R.drawable.as_statusbar, ticker, System.currentTimeMillis());
 			PendingIntent contentIntent = PendingIntent.getActivity(RadioPlayerService.this, 0, new Intent(RadioPlayerService.this, Player.class), 0);
 			String info = currentTrack.getTitle() + " - " + currentTrack.getCreator();
 			notification.setLatestEventInfo(RadioPlayerService.this, currentStation.getName(), info, contentIntent);
@@ -513,8 +525,6 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 				method = Service.class.getMethod("setForeground", types);
 				method.invoke(this, args);
 			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
 			}
 		} catch (Exception e) {
 		}
@@ -552,8 +562,6 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 				method = Service.class.getMethod("setForeground", types);
 				method.invoke(this, args);
 			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
 			}
 		} catch (Exception e) {
 		}
@@ -618,11 +626,12 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 						p.seekTo(mTrackPosition);
 					mTrackPosition = 0;
 					p.start();
+					mState = STATE_PLAYING;
 					try {
-						playingNotify();
+						playingNotify(getString(R.string.playerservice_streaming_ticker_text, currentTrack.getTitle(),
+								currentTrack.getCreator()));
 					} catch (NullPointerException e) {
 					}
-					mState = STATE_PLAYING;
 					mAutoSkipCount = 0;
 					logger.info("Ready to produce packets (Hi, Laurie!)");
 					mUpdatedTrialCount = false;
@@ -844,7 +853,6 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		}
 
 		if (mState == STATE_PLAYING || mState == STATE_PREPARING) {
-			currentTrack = null;
 			if (mp != null && mp.isPlaying()) {
 				mp.stop();
 			}
@@ -853,6 +861,8 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		mTrackPosition = 0;
 		lostDataConnection = false;
 		mState = STATE_SKIPPING;
+		playingNotify(null);
+		currentTrack = null;
 		// Check if we're running low on tracks
 		if (currentQueue.size() < 1) {
 			mPlaylistRetryCount = 0;
@@ -943,7 +953,8 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 				wifiLock.acquire();
 			if(!wakeLock.isHeld())
 				wakeLock.acquire();
-			playingNotify();
+			playingNotify(getString(R.string.playerservice_streaming_ticker_text, currentTrack.getTitle(),
+					currentTrack.getCreator()));
 			notifyChange(ScrobblerService.META_CHANGED);
 			try {
 				if(currentTrack != null) {
@@ -1278,11 +1289,10 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 					mArtwork = BitmapFactory.decodeResource(getResources(), R.drawable.no_artwork);
 				Notification notification = null;
 				try {
-					notification = buildNotification(mArtwork);
+					notification = buildNotification(mArtwork, null);
 					nm.notify(NOTIFY_ID, notification);
 				} catch (java.lang.RuntimeException e) {
-					notification = new Notification(R.drawable.as_statusbar, getString(R.string.playerservice_streaming_ticker_text, currentTrack.getTitle(),
-							currentTrack.getCreator()), System.currentTimeMillis());
+					notification = new Notification(R.drawable.as_statusbar, null, System.currentTimeMillis());
 					PendingIntent contentIntent = PendingIntent.getActivity(RadioPlayerService.this, 0, new Intent(RadioPlayerService.this, Player.class), 0);
 					String info = currentTrack.getTitle() + " - " + currentTrack.getCreator();
 					notification.setLatestEventInfo(RadioPlayerService.this, currentStation.getName(), info, contentIntent);
@@ -1492,8 +1502,10 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 		}
 		
 		public void setLoved(boolean loved) throws RemoteException {
-			if(currentTrack != null)
+			if(currentTrack != null) {
 				currentTrack.setLoved(loved);
+				playingNotify(null);
+			}
 		}
 		
 		public String getArtistName() throws RemoteException {
