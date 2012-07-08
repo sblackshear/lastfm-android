@@ -3,6 +3,7 @@
  */
 package fm.last.android;
 
+import java.lang.reflect.Field;
 import java.util.Formatter;
 import java.util.concurrent.RejectedExecutionException;
 
@@ -68,8 +69,16 @@ public class RadioWidgetProvider extends AppWidgetProvider {
 		return "com.android.music";
 	}
 
+	@SuppressWarnings("deprecation")
 	public static boolean isAndroidMusicInstalled(Context ctx) {
-		if(Integer.decode(Build.VERSION.SDK) > 8 || Build.MANUFACTURER.toUpperCase().equals("LGE"))
+		String manufacturer = "";
+		try {
+			Field f = Build.class.getField("MANUFACTURER");
+			manufacturer = (String)f.get(null);
+		} catch (Exception e) {
+		}
+
+		if(Integer.decode(Build.VERSION.SDK) > 8 || manufacturer.toUpperCase().startsWith("LG"))
 			return false;
 		try {
 			PackageManager pm = ctx.getPackageManager();
