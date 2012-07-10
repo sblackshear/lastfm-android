@@ -728,13 +728,15 @@ public class RadioPlayerService extends Service implements MusicFocusable {
 				track.setLocationUrl(newURL.toString());
 			}
 			String url = track.getLocationUrl();
-			//Stream through a proxy to enforce one connection per track
-			if (proxy == null) {
-				proxy = new StreamProxy();
-				proxy.init();
-				proxy.start();
+			//Stream through a proxy to enforce one connection per track (Honeycomb+)
+			if(Integer.decode(Build.VERSION.SDK) >= 11) {
+				if (proxy == null) {
+					proxy = new StreamProxy();
+					proxy.init();
+					proxy.start();
+				}
+				url = String.format("http://127.0.0.1:%d/%s",proxy.getPort(), url);
 			}
-			url = String.format("http://127.0.0.1:%d/%s",proxy.getPort(), url);
 			if(!wifiLock.isHeld())
 				wifiLock.acquire();
 			if(!wakeLock.isHeld())
