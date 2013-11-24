@@ -157,7 +157,7 @@ public class StreamProxy implements Runnable {
     	  if(line != null && line.toLowerCase().startsWith("user-agent: ")) {
     		  ua = line.substring(12);
     	  }
-      } while(!"".equals(line) && reader.ready());
+      } while(line != null && !"".equals(line) && reader.ready());
     } catch (IOException e) {
       Log.e(LOG_TAG, "Error parsing request", e);
       return request;
