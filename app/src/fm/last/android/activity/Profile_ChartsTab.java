@@ -373,12 +373,8 @@ public class Profile_ChartsTab extends ListActivity {
 		getListView().setEnabled(true);
 
 		for (ListView list : mProfileLists) {
-			try {
-				((ListAdapter) list.getAdapter()).disableLoadBar();
-			} catch (Exception e) {
-				// FIXME: this is ugly, but sometimes adapters aren't the
-				// shape we expect.
-			}
+                        if (list.getAdapter() != null && list.getAdapter().getClass().equals(ListAdapter.class))
+                                ((ListAdapter) list.getAdapter()).disableLoadBar();
 		}
 
 		super.onResume();
